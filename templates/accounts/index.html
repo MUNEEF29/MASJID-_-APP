@@ -1,10 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Chart of Accounts - Masjid Accounting{% endblock %}
+{% block title %}Chart of Accounts - {{ config.MOSQUE_NAME }}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="bi bi-journal-text"></i> Chart of Accounts</h2>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="page-title mb-1"><i class="bi bi-journal-text me-2"></i>Chart of Accounts</h2>
+        <p class="text-muted mb-0">Complete list of all accounts organized by type</p>
+    </div>
 </div>
 
 <div class="row">
@@ -12,17 +15,27 @@
     <div class="col-lg-6 mb-4">
         <div class="card h-100">
             <div class="card-header 
-                {% if acc_type == 'asset' %}bg-primary
+                {% if acc_type == 'asset' %}
                 {% elif acc_type == 'liability' %}bg-warning
-                {% elif acc_type == 'equity' %}bg-info
-                {% elif acc_type == 'income' %}bg-success
-                {% else %}bg-danger{% endif %} text-white">
-                <h5 class="mb-0">{{ acc_type|title }} Accounts</h5>
+                {% elif acc_type == 'equity' %}bg-info text-white
+                {% elif acc_type == 'income' %}
+                {% else %}
+                {% endif %}
+                {% if acc_type == 'expense' %}
+                " style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important; border-bottom: 2px solid #d4af37;"
+                {% elif acc_type == 'asset' %}
+                " style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important; border-bottom: 2px solid #d4af37;"
+                {% endif %}
+                >
+                <h5 class="mb-0 {% if acc_type in ['asset', 'expense', 'equity', 'income'] %}text-white{% endif %}">
+                    <i class="bi bi-{% if acc_type == 'asset' %}wallet2{% elif acc_type == 'liability' %}credit-card{% elif acc_type == 'equity' %}piggy-bank{% elif acc_type == 'income' %}arrow-up-circle{% else %}arrow-down-circle{% endif %} me-2"></i>
+                    {{ acc_type|title }} Accounts
+                </h5>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
-                        <thead class="table-light">
+                        <thead>
                             <tr>
                                 <th>Code</th>
                                 <th>Name</th>
@@ -33,7 +46,7 @@
                         <tbody>
                             {% for account in grouped_accounts[acc_type] %}
                             <tr>
-                                <td><strong>{{ account.code }}</strong></td>
+                                <td><strong class="text-primary">{{ account.code }}</strong></td>
                                 <td>
                                     <a href="{{ url_for('accounts.ledger', id=account.id) }}">{{ account.name }}</a>
                                 </td>
@@ -45,10 +58,10 @@
                                         {{ fund_names.get(account.fund_type, account.fund_type) }}
                                     </span>
                                 </td>
-                                <td class="text-end">{{ "{:,.2f}".format(account.get_balance()) }}</td>
+                                <td class="text-end fw-medium">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(account.get_balance()) }}</td>
                             </tr>
                             {% else %}
-                            <tr><td colspan="4" class="text-center text-muted">No accounts</td></tr>
+                            <tr><td colspan="4" class="text-center text-muted py-3">No accounts</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>

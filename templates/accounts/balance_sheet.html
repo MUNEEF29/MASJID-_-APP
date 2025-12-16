@@ -1,11 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Balance Sheet - Masjid Accounting{% endblock %}
+{% block title %}Balance Sheet - {{ config.MOSQUE_NAME }}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="bi bi-clipboard-check"></i> Balance Sheet</h2>
-    <span class="badge {% if is_balanced %}bg-success{% else %}bg-danger{% endif %} fs-6">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="page-title mb-1"><i class="bi bi-clipboard-check me-2"></i>Balance Sheet</h2>
+        <p class="text-muted mb-0">Assets, liabilities, and fund balances</p>
+    </div>
+    <span class="badge {% if is_balanced %}bg-success{% else %}bg-danger{% endif %} fs-6 px-3 py-2">
+        <i class="bi bi-{% if is_balanced %}check-circle{% else %}x-circle{% endif %} me-1"></i>
         {% if is_balanced %}Balanced{% else %}Not Balanced{% endif %}
     </span>
 </div>
@@ -14,11 +18,13 @@
     <div class="card-body">
         <form method="GET" class="row g-3">
             <div class="col-md-4">
-                <label class="form-label">As of Date</label>
+                <label class="form-label fw-medium">As of Date</label>
                 <input type="date" class="form-control" name="as_of_date" value="{{ as_of_date }}">
             </div>
-            <div class="col-md-4 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary me-2">Generate</button>
+            <div class="col-md-4 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-search me-1"></i> Generate
+                </button>
                 <a href="{{ url_for('accounts.balance_sheet') }}" class="btn btn-outline-secondary">Current</a>
             </div>
         </form>
@@ -27,9 +33,9 @@
 
 <div class="row">
     <div class="col-lg-6 mb-4">
-        <div class="card h-100 border-primary">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="bi bi-wallet2"></i> Assets</h5>
+        <div class="card h-100">
+            <div class="card-header" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important; border-bottom: 2px solid #d4af37;">
+                <h5 class="mb-0 text-white"><i class="bi bi-wallet2 me-2"></i>Assets</h5>
             </div>
             <div class="card-body p-0">
                 <table class="table table-hover mb-0">
@@ -37,17 +43,19 @@
                         {% for item in asset_data %}
                         <tr>
                             <td>
-                                <strong>{{ item.account.code }}</strong> {{ item.account.name }}
+                                <strong class="text-primary">{{ item.account.code }}</strong> {{ item.account.name }}
+                                {% if fund_names.get(item.account.fund_type, '') %}
                                 <br><small class="text-muted">{{ fund_names.get(item.account.fund_type, '') }}</small>
+                                {% endif %}
                             </td>
-                            <td class="text-end">{{ "{:,.2f}".format(item.balance) }}</td>
+                            <td class="text-end fw-medium">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(item.balance) }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                     <tfoot class="table-primary">
                         <tr>
                             <th>Total Assets</th>
-                            <th class="text-end">{{ "{:,.2f}".format(total_assets) }}</th>
+                            <th class="text-end">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(total_assets) }}</th>
                         </tr>
                     </tfoot>
                 </table>
@@ -55,34 +63,34 @@
         </div>
     </div>
     <div class="col-lg-6">
-        <div class="card mb-4 border-warning">
+        <div class="card mb-4">
             <div class="card-header bg-warning">
-                <h5 class="mb-0"><i class="bi bi-credit-card-2-back"></i> Liabilities</h5>
+                <h5 class="mb-0"><i class="bi bi-credit-card-2-back me-2"></i>Liabilities</h5>
             </div>
             <div class="card-body p-0">
                 <table class="table table-hover mb-0">
                     <tbody>
                         {% for item in liability_data %}
                         <tr>
-                            <td><strong>{{ item.account.code }}</strong> {{ item.account.name }}</td>
-                            <td class="text-end">{{ "{:,.2f}".format(item.balance) }}</td>
+                            <td><strong class="text-warning">{{ item.account.code }}</strong> {{ item.account.name }}</td>
+                            <td class="text-end fw-medium">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(item.balance) }}</td>
                         </tr>
                         {% else %}
-                        <tr><td colspan="2" class="text-center text-muted">No liabilities</td></tr>
+                        <tr><td colspan="2" class="text-center text-muted py-3">No liabilities</td></tr>
                         {% endfor %}
                     </tbody>
                     <tfoot class="table-warning">
                         <tr>
                             <th>Total Liabilities</th>
-                            <th class="text-end">{{ "{:,.2f}".format(total_liabilities) }}</th>
+                            <th class="text-end">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(total_liabilities) }}</th>
                         </tr>
                     </tfoot>
                 </table>
             </div>
         </div>
-        <div class="card border-info">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0"><i class="bi bi-piggy-bank"></i> Fund Balances (Equity)</h5>
+        <div class="card">
+            <div class="card-header" style="background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%) !important; border-bottom: 2px solid #d4af37;">
+                <h5 class="mb-0 text-white"><i class="bi bi-piggy-bank me-2"></i>Fund Balances (Equity)</h5>
             </div>
             <div class="card-body p-0">
                 <table class="table table-hover mb-0">
@@ -90,21 +98,25 @@
                         {% for item in equity_data %}
                         <tr>
                             <td>
-                                <strong>{{ item.account.code }}</strong> {{ item.account.name }}
+                                <strong class="text-info">{{ item.account.code }}</strong> {{ item.account.name }}
+                                {% if fund_names.get(item.account.fund_type, '') %}
                                 <br><small class="text-muted">{{ fund_names.get(item.account.fund_type, '') }}</small>
+                                {% endif %}
                             </td>
-                            <td class="text-end">{{ "{:,.2f}".format(item.balance) }}</td>
+                            <td class="text-end fw-medium">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(item.balance) }}</td>
                         </tr>
                         {% endfor %}
                         <tr class="table-light">
-                            <td><em>Current Period Surplus/(Deficit)</em></td>
-                            <td class="text-end">{{ "{:,.2f}".format(current_surplus) }}</td>
+                            <td><em><i class="bi bi-graph-up me-1"></i>Current Period Surplus/(Deficit)</em></td>
+                            <td class="text-end fw-medium {% if current_surplus >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(current_surplus) }}
+                            </td>
                         </tr>
                     </tbody>
                     <tfoot class="table-info">
                         <tr>
                             <th>Total Fund Balances</th>
-                            <th class="text-end">{{ "{:,.2f}".format(total_equity_with_surplus) }}</th>
+                            <th class="text-end">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(total_equity_with_surplus) }}</th>
                         </tr>
                     </tfoot>
                 </table>
@@ -115,17 +127,17 @@
 
 <div class="card mt-4">
     <div class="card-body">
-        <div class="row text-center">
+        <div class="row text-center align-items-center">
             <div class="col-md-4">
-                <h6 class="text-muted">Total Assets</h6>
-                <h4>{{ "{:,.2f}".format(total_assets) }}</h4>
+                <h6 class="text-muted mb-1">Total Assets</h6>
+                <h4 class="text-primary mb-0">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(total_assets) }}</h4>
             </div>
             <div class="col-md-4">
-                <h6 class="text-muted">=</h6>
+                <h3 class="text-muted mb-0">=</h3>
             </div>
             <div class="col-md-4">
-                <h6 class="text-muted">Liabilities + Fund Balances</h6>
-                <h4>{{ "{:,.2f}".format(total_liabilities + total_equity_with_surplus) }}</h4>
+                <h6 class="text-muted mb-1">Liabilities + Fund Balances</h6>
+                <h4 class="text-success mb-0">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(total_liabilities + total_equity_with_surplus) }}</h4>
             </div>
         </div>
     </div>

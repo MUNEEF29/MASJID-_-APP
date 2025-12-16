@@ -1,17 +1,20 @@
 {% extends "base.html" %}
 
-{% block title %}Monthly Report - Masjid Accounting{% endblock %}
+{% block title %}Monthly Report - {{ config.MOSQUE_NAME }}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="bi bi-calendar-month"></i> Monthly Report</h2>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="page-title mb-1"><i class="bi bi-calendar-month me-2"></i>Monthly Report</h2>
+        <p class="text-muted mb-0">Summary by category for a specific month</p>
+    </div>
 </div>
 
 <div class="card mb-4">
     <div class="card-body">
         <form method="GET" class="row g-3">
             <div class="col-md-3">
-                <label class="form-label">Year</label>
+                <label class="form-label fw-medium">Year</label>
                 <select name="year" class="form-select">
                     {% for y in range(year - 2, year + 2) %}
                     <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
@@ -19,7 +22,7 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label">Month</label>
+                <label class="form-label fw-medium">Month</label>
                 <select name="month" class="form-select">
                     {% for m in range(1, 13) %}
                     <option value="{{ m }}" {% if m == month %}selected{% endif %}>
@@ -29,36 +32,36 @@
                 </select>
             </div>
             <div class="col-md-3 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search"></i> Generate Report
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-search me-1"></i> Generate Report
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<div class="row mb-4">
+<div class="row mb-4 g-3">
     <div class="col-md-4">
-        <div class="card bg-success text-white">
-            <div class="card-body text-center">
-                <h6>Total Income</h6>
-                <h3>{{ "{:,.2f}".format(total_income) }}</h3>
+        <div class="card stat-card emerald">
+            <div class="card-body text-center py-4">
+                <h6 class="opacity-75">Total Income</h6>
+                <h3 class="mb-0">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(total_income) }}</h3>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card bg-danger text-white">
-            <div class="card-body text-center">
-                <h6>Total Expense</h6>
-                <h3>{{ "{:,.2f}".format(total_expense) }}</h3>
+        <div class="card stat-card red">
+            <div class="card-body text-center py-4">
+                <h6 class="opacity-75">Total Expense</h6>
+                <h3 class="mb-0">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(total_expense) }}</h3>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card {% if total_income - total_expense >= 0 %}bg-info{% else %}bg-warning{% endif %} text-white">
-            <div class="card-body text-center">
-                <h6>Surplus/Deficit</h6>
-                <h3>{{ "{:,.2f}".format(total_income - total_expense) }}</h3>
+        <div class="card stat-card {% if total_income - total_expense >= 0 %}blue{% else %}gold{% endif %}">
+            <div class="card-body text-center py-4">
+                <h6 class="opacity-75">Surplus/Deficit</h6>
+                <h3 class="mb-0">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(total_income - total_expense) }}</h3>
             </div>
         </div>
     </div>
@@ -67,12 +70,12 @@
 <div class="row">
     <div class="col-lg-6 mb-4">
         <div class="card h-100">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0">Income by Category</h5>
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Income by Category</h5>
             </div>
             <div class="card-body p-0">
                 <table class="table table-hover mb-0">
-                    <thead class="table-light">
+                    <thead>
                         <tr>
                             <th>Category</th>
                             <th class="text-end">Amount</th>
@@ -84,15 +87,15 @@
                         {% set pct = (item.total / total_income * 100) if total_income > 0 else 0 %}
                         <tr>
                             <td>{{ income_category_names.get(item.category, item.category) }}</td>
-                            <td class="text-end">{{ "{:,.2f}".format(item.total) }}</td>
+                            <td class="text-end fw-medium">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(item.total) }}</td>
                             <td>
                                 <div class="progress">
-                                    <div class="progress-bar bg-success" style="width: {{ pct }}%">{{ "{:.1f}".format(pct) }}%</div>
+                                    <div class="progress-bar" style="width: {{ pct }}%">{{ "{:.1f}".format(pct) }}%</div>
                                 </div>
                             </td>
                         </tr>
                         {% else %}
-                        <tr><td colspan="3" class="text-center text-muted">No income data</td></tr>
+                        <tr><td colspan="3" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>No income data</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -101,12 +104,12 @@
     </div>
     <div class="col-lg-6 mb-4">
         <div class="card h-100">
-            <div class="card-header bg-danger text-white">
-                <h5 class="mb-0">Expenses by Category</h5>
+            <div class="card-header" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important; border-bottom: 2px solid #d4af37;">
+                <h5 class="mb-0 text-white"><i class="bi bi-pie-chart me-2"></i>Expenses by Category</h5>
             </div>
             <div class="card-body p-0">
                 <table class="table table-hover mb-0">
-                    <thead class="table-light">
+                    <thead>
                         <tr>
                             <th>Category</th>
                             <th class="text-end">Amount</th>
@@ -118,7 +121,7 @@
                         {% set pct = (item.total / total_expense * 100) if total_expense > 0 else 0 %}
                         <tr>
                             <td>{{ expense_category_names.get(item.category, item.category) }}</td>
-                            <td class="text-end">{{ "{:,.2f}".format(item.total) }}</td>
+                            <td class="text-end fw-medium">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(item.total) }}</td>
                             <td>
                                 <div class="progress">
                                     <div class="progress-bar bg-danger" style="width: {{ pct }}%">{{ "{:.1f}".format(pct) }}%</div>
@@ -126,7 +129,7 @@
                             </td>
                         </tr>
                         {% else %}
-                        <tr><td colspan="3" class="text-center text-muted">No expense data</td></tr>
+                        <tr><td colspan="3" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>No expense data</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>

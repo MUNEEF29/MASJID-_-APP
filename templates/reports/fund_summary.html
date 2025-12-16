@@ -1,58 +1,58 @@
 {% extends "base.html" %}
 
-{% block title %}Fund Summary - Masjid Accounting{% endblock %}
+{% block title %}Fund Summary - {{ config.MOSQUE_NAME }}{% endblock %}
 
 {% block content %}
 <div class="mb-4">
-    <h2><i class="bi bi-pie-chart"></i> Fund Summary</h2>
+    <h2 class="page-title mb-1"><i class="bi bi-pie-chart me-2"></i>Fund Summary</h2>
     <p class="text-muted">Overview of all fund balances and their status</p>
 </div>
 
 <div class="row g-4">
     {% for fund_type, data in fund_data.items() %}
     <div class="col-lg-4">
-        <div class="card h-100 
-            {% if fund_type == 'zakat' %}border-success
-            {% elif fund_type == 'amanah' %}border-info
-            {% else %}border-primary{% endif %}">
+        <div class="card h-100">
             <div class="card-header 
-                {% if fund_type == 'zakat' %}bg-success
-                {% elif fund_type == 'amanah' %}bg-info
-                {% else %}bg-primary{% endif %} text-white">
-                <h5 class="mb-0">{{ data.name }}</h5>
+                {% if fund_type == 'zakat' %}
+                {% elif fund_type == 'amanah' %}bg-info text-white
+                {% else %}{% endif %}">
+                <h5 class="mb-0">
+                    <i class="bi bi-{% if fund_type == 'zakat' %}heart{% elif fund_type == 'amanah' %}lock{% else %}cash-stack{% endif %} me-2"></i>
+                    {{ data.name }}
+                </h5>
             </div>
             <div class="card-body">
                 <table class="table table-borderless mb-0">
                     <tr>
-                        <td class="text-muted">Total Income</td>
-                        <td class="text-end text-success fw-bold">{{ "{:,.2f}".format(data.total_income) }}</td>
+                        <td class="text-muted"><i class="bi bi-arrow-up-circle me-1 text-success"></i>Total Income</td>
+                        <td class="text-end text-success fw-bold">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(data.total_income) }}</td>
                     </tr>
                     <tr>
-                        <td class="text-muted">Total Expenditure</td>
-                        <td class="text-end text-danger fw-bold">{{ "{:,.2f}".format(data.total_expense) }}</td>
+                        <td class="text-muted"><i class="bi bi-arrow-down-circle me-1 text-danger"></i>Total Expenditure</td>
+                        <td class="text-end text-danger fw-bold">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(data.total_expense) }}</td>
                     </tr>
                     <tr class="border-top">
-                        <td class="text-muted">Surplus/Deficit</td>
+                        <td class="text-muted"><i class="bi bi-graph-up me-1"></i>Surplus/Deficit</td>
                         <td class="text-end fw-bold {% if data.surplus >= 0 %}text-success{% else %}text-danger{% endif %}">
-                            {{ "{:,.2f}".format(data.surplus) }}
+                            {{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(data.surplus) }}
                         </td>
                     </tr>
                     <tr class="border-top">
-                        <td class="text-muted">Current Assets</td>
-                        <td class="text-end fw-bold fs-5">{{ "{:,.2f}".format(data.assets) }}</td>
+                        <td class="text-muted"><i class="bi bi-wallet2 me-1 text-primary"></i>Current Assets</td>
+                        <td class="text-end fw-bold fs-5 text-primary">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(data.assets) }}</td>
                     </tr>
                 </table>
             </div>
             {% if fund_type == 'zakat' %}
             <div class="card-footer bg-light">
                 <small class="text-muted">
-                    <i class="bi bi-shield-check"></i> Ring-fenced for Zakat distribution only
+                    <i class="bi bi-shield-check text-success me-1"></i>Ring-fenced for Zakat distribution only
                 </small>
             </div>
             {% elif fund_type == 'amanah' %}
             <div class="card-footer bg-light">
                 <small class="text-muted">
-                    <i class="bi bi-lock"></i> Trust/Amanah funds held for specific purposes
+                    <i class="bi bi-lock text-info me-1"></i>Trust/Amanah funds held for specific purposes
                 </small>
             </div>
             {% endif %}
@@ -63,7 +63,7 @@
 
 <div class="card mt-5">
     <div class="card-header">
-        <h5 class="mb-0">Fund Distribution</h5>
+        <h5 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>Fund Distribution</h5>
     </div>
     <div class="card-body">
         <div class="row">
@@ -71,22 +71,22 @@
                 <canvas id="fundChart"></canvas>
             </div>
             <div class="col-md-6">
-                <h6 class="mb-3">Islamic Compliance Notes</h6>
+                <h6 class="mb-3"><i class="bi bi-check2-square me-2 text-success"></i>Islamic Compliance Notes</h6>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <i class="bi bi-check-circle text-success"></i>
+                    <li class="list-group-item border-0 ps-0">
+                        <i class="bi bi-check-circle text-success me-2"></i>
                         Zakat funds are strictly separated from general funds
                     </li>
-                    <li class="list-group-item">
-                        <i class="bi bi-check-circle text-success"></i>
+                    <li class="list-group-item border-0 ps-0">
+                        <i class="bi bi-check-circle text-success me-2"></i>
                         Amanah/Trust funds are ring-fenced for their intended purpose
                     </li>
-                    <li class="list-group-item">
-                        <i class="bi bi-check-circle text-success"></i>
+                    <li class="list-group-item border-0 ps-0">
+                        <i class="bi bi-check-circle text-success me-2"></i>
                         No interest calculations applied to any fund
                     </li>
-                    <li class="list-group-item">
-                        <i class="bi bi-check-circle text-success"></i>
+                    <li class="list-group-item border-0 ps-0">
+                        <i class="bi bi-check-circle text-success me-2"></i>
                         Transparent labeling and full audit trail maintained
                     </li>
                 </ul>
@@ -106,14 +106,19 @@ document.addEventListener('DOMContentLoaded', function() {
             labels: [{% for fund_type, data in fund_data.items() %}'{{ data.name }}'{% if not loop.last %}, {% endif %}{% endfor %}],
             datasets: [{
                 data: [{% for fund_type, data in fund_data.items() %}{{ data.assets }}{% if not loop.last %}, {% endif %}{% endfor %}],
-                backgroundColor: ['#0d6efd', '#198754', '#0dcaf0']
+                backgroundColor: ['#0d6b4f', '#d4af37', '#0891b2'],
+                borderWidth: 0
             }]
         },
         options: {
             responsive: true,
             plugins: {
                 legend: {
-                    position: 'bottom'
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
                 }
             }
         }

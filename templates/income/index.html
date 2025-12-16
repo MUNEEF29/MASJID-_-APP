@@ -1,13 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Income - Masjid Accounting{% endblock %}
+{% block title %}Income - {{ config.MOSQUE_NAME }}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="bi bi-cash-stack"></i> Income Management</h2>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="page-title mb-1"><i class="bi bi-cash-stack me-2"></i>Income Management</h2>
+        <p class="text-muted mb-0">Track and manage all income entries</p>
+    </div>
     {% if not current_user.is_read_only() %}
     <a href="{{ url_for('income.create') }}" class="btn btn-success">
-        <i class="bi bi-plus-lg"></i> New Entry
+        <i class="bi bi-plus-lg me-1"></i> New Entry
     </a>
     {% endif %}
 </div>
@@ -16,7 +19,7 @@
     <div class="card-body">
         <form method="GET" class="row g-3">
             <div class="col-md-3">
-                <label class="form-label">Status</label>
+                <label class="form-label fw-medium">Status</label>
                 <select name="status" class="form-select">
                     <option value="">All Statuses</option>
                     {% for status in statuses %}
@@ -27,7 +30,7 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label">Category</label>
+                <label class="form-label fw-medium">Category</label>
                 <select name="category" class="form-select">
                     <option value="">All Categories</option>
                     {% for cat in categories %}
@@ -38,7 +41,7 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label">Fund</label>
+                <label class="form-label fw-medium">Fund</label>
                 <select name="fund" class="form-select">
                     <option value="">All Funds</option>
                     {% for fund in funds %}
@@ -48,11 +51,13 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-3 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary me-2">
-                    <i class="bi bi-funnel"></i> Filter
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-funnel me-1"></i> Filter
                 </button>
-                <a href="{{ url_for('income.index') }}" class="btn btn-outline-secondary">Clear</a>
+                <a href="{{ url_for('income.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-lg"></i>
+                </a>
             </div>
         </form>
     </div>
@@ -62,7 +67,7 @@
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
-                <thead class="table-light">
+                <thead>
                     <tr>
                         <th>Receipt #</th>
                         <th>Date</th>
@@ -77,32 +82,35 @@
                     {% for income in incomes.items %}
                     <tr>
                         <td>
-                            <a href="{{ url_for('income.view', id=income.id) }}">{{ income.receipt_number }}</a>
+                            <a href="{{ url_for('income.view', id=income.id) }}" class="fw-medium">{{ income.receipt_number }}</a>
                         </td>
                         <td>{{ income.date.strftime('%d %b %Y') }}</td>
                         <td>
                             <span class="badge bg-secondary">{{ category_names.get(income.category, income.category) }}</span>
                         </td>
                         <td>{{ income.source[:30] }}{% if income.source|length > 30 %}...{% endif %}</td>
-                        <td class="text-end fw-bold">{{ "{:,.2f}".format(income.amount) }}</td>
+                        <td class="text-end fw-bold">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(income.amount) }}</td>
                         <td>
                             {% if income.verification_status == 'verified' %}
-                            <span class="badge bg-success">Verified</span>
+                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Verified</span>
                             {% elif income.verification_status == 'pending' %}
-                            <span class="badge bg-warning text-dark">Pending</span>
+                            <span class="badge bg-warning"><i class="bi bi-clock me-1"></i>Pending</span>
                             {% else %}
-                            <span class="badge bg-danger">Rejected</span>
+                            <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Rejected</span>
                             {% endif %}
                         </td>
                         <td>
-                            <a href="{{ url_for('income.view', id=income.id) }}" class="btn btn-sm btn-outline-primary">
+                            <a href="{{ url_for('income.view', id=income.id) }}" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" title="View Details">
                                 <i class="bi bi-eye"></i>
                             </a>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-4">No income entries found</td>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No income entries found
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -110,12 +118,14 @@
         </div>
     </div>
     {% if incomes.pages > 1 %}
-    <div class="card-footer">
+    <div class="card-footer bg-transparent">
         <nav>
             <ul class="pagination mb-0 justify-content-center">
                 {% if incomes.has_prev %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for('income.index', page=incomes.prev_num, status=current_status, category=current_category, fund=current_fund) }}">Previous</a>
+                    <a class="page-link" href="{{ url_for('income.index', page=incomes.prev_num, status=current_status, category=current_category, fund=current_fund) }}">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
                 </li>
                 {% endif %}
                 {% for page in incomes.iter_pages() %}
@@ -129,7 +139,9 @@
                 {% endfor %}
                 {% if incomes.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for('income.index', page=incomes.next_num, status=current_status, category=current_category, fund=current_fund) }}">Next</a>
+                    <a class="page-link" href="{{ url_for('income.index', page=incomes.next_num, status=current_status, category=current_category, fund=current_fund) }}">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
                 </li>
                 {% endif %}
             </ul>

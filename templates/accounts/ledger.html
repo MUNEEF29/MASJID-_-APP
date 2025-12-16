@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}{{ account.name }} Ledger - Masjid Accounting{% endblock %}
+{% block title %}{{ account.name }} Ledger - {{ config.MOSQUE_NAME }}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div>
-        <h2><i class="bi bi-journal-bookmark"></i> {{ account.code }} - {{ account.name }}</h2>
+        <h2 class="page-title mb-1"><i class="bi bi-journal-bookmark me-2"></i>{{ account.code }} - {{ account.name }}</h2>
         <p class="text-muted mb-0">
             <span class="badge bg-secondary">{{ account.account_type|title }}</span>
             <span class="badge bg-info">{{ fund_names.get(account.fund_type, account.fund_type) }}</span>
@@ -13,7 +13,7 @@
     </div>
     <div class="text-end">
         <small class="text-muted">Current Balance</small>
-        <h3 class="mb-0">{{ "{:,.2f}".format(current_balance) }}</h3>
+        <h3 class="mb-0 text-primary">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(current_balance) }}</h3>
     </div>
 </div>
 
@@ -21,18 +21,20 @@
     <div class="card-body">
         <form method="GET" class="row g-3">
             <div class="col-md-4">
-                <label class="form-label">Start Date</label>
+                <label class="form-label fw-medium">Start Date</label>
                 <input type="date" class="form-control" name="start_date" value="{{ start_date }}">
             </div>
             <div class="col-md-4">
-                <label class="form-label">End Date</label>
+                <label class="form-label fw-medium">End Date</label>
                 <input type="date" class="form-control" name="end_date" value="{{ end_date }}">
             </div>
-            <div class="col-md-4 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary me-2">
-                    <i class="bi bi-funnel"></i> Filter
+            <div class="col-md-4 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-funnel me-1"></i> Filter
                 </button>
-                <a href="{{ url_for('accounts.ledger', id=account.id) }}" class="btn btn-outline-secondary">Clear</a>
+                <a href="{{ url_for('accounts.ledger', id=account.id) }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-lg"></i>
+                </a>
             </div>
         </form>
     </div>
@@ -42,7 +44,7 @@
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
-                <thead class="table-light">
+                <thead>
                     <tr>
                         <th>Date</th>
                         <th>Description</th>
@@ -54,8 +56,8 @@
                 <tbody>
                     {% if start_date %}
                     <tr class="table-secondary">
-                        <td colspan="4"><em>Opening Balance</em></td>
-                        <td class="text-end"><strong>{{ "{:,.2f}".format(opening_balance) }}</strong></td>
+                        <td colspan="4"><em><i class="bi bi-arrow-right me-1"></i>Opening Balance</em></td>
+                        <td class="text-end"><strong>{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(opening_balance) }}</strong></td>
                     </tr>
                     {% endif %}
                     {% for entry, balance in entries_with_balance %}
@@ -64,19 +66,22 @@
                         <td>{{ entry.description or entry.transaction.description }}</td>
                         <td class="text-end">
                             {% if entry.debit_amount and entry.debit_amount > 0 %}
-                            {{ "{:,.2f}".format(entry.debit_amount) }}
+                            <span class="text-success">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(entry.debit_amount) }}</span>
                             {% endif %}
                         </td>
                         <td class="text-end">
                             {% if entry.credit_amount and entry.credit_amount > 0 %}
-                            {{ "{:,.2f}".format(entry.credit_amount) }}
+                            <span class="text-danger">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(entry.credit_amount) }}</span>
                             {% endif %}
                         </td>
-                        <td class="text-end"><strong>{{ "{:,.2f}".format(balance) }}</strong></td>
+                        <td class="text-end"><strong>{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(balance) }}</strong></td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-4">No entries found</td>
+                        <td colspan="5" class="text-center text-muted py-5">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No entries found
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -84,12 +89,14 @@
         </div>
     </div>
     {% if entries.pages > 1 %}
-    <div class="card-footer">
+    <div class="card-footer bg-transparent">
         <nav>
             <ul class="pagination mb-0 justify-content-center">
                 {% if entries.has_prev %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for('accounts.ledger', id=account.id, page=entries.prev_num, start_date=start_date, end_date=end_date) }}">Previous</a>
+                    <a class="page-link" href="{{ url_for('accounts.ledger', id=account.id, page=entries.prev_num, start_date=start_date, end_date=end_date) }}">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
                 </li>
                 {% endif %}
                 {% for page in entries.iter_pages() %}
@@ -103,7 +110,9 @@
                 {% endfor %}
                 {% if entries.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for('accounts.ledger', id=account.id, page=entries.next_num, start_date=start_date, end_date=end_date) }}">Next</a>
+                    <a class="page-link" href="{{ url_for('accounts.ledger', id=account.id, page=entries.next_num, start_date=start_date, end_date=end_date) }}">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
                 </li>
                 {% endif %}
             </ul>
@@ -114,7 +123,7 @@
 
 <div class="mt-3">
     <a href="{{ url_for('accounts.index') }}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left"></i> Back to Chart of Accounts
+        <i class="bi bi-arrow-left me-1"></i> Back to Chart of Accounts
     </a>
 </div>
 {% endblock %}

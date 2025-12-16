@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Masjid Accounting{% endblock %}</title>
+    <title>{% block title %}{{ config.MOSQUE_NAME }}{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
@@ -11,10 +11,16 @@
 </head>
 <body>
     {% if current_user.is_authenticated %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-success sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ url_for('dashboard.index') }}">
-                <i class="bi bi-building"></i> Masjid Accounting
+                <div class="mosque-logo">
+                    <i class="bi bi-moon-stars-fill"></i>
+                </div>
+                <div>
+                    <span>{{ config.MOSQUE_NAME }}</span>
+                    <span class="arabic-text">{{ config.MOSQUE_NAME_ARABIC }}</span>
+                </div>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -31,9 +37,9 @@
                             <i class="bi bi-cash-stack"></i> Income
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('income.index') }}">View All</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('income.index') }}"><i class="bi bi-list-ul me-2"></i>View All</a></li>
                             {% if not current_user.is_read_only() %}
-                            <li><a class="dropdown-item" href="{{ url_for('income.create') }}">New Entry</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('income.create') }}"><i class="bi bi-plus-circle me-2"></i>New Entry</a></li>
                             {% endif %}
                         </ul>
                     </li>
@@ -42,9 +48,9 @@
                             <i class="bi bi-credit-card"></i> Expenses
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('expenses.index') }}">View All</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('expenses.index') }}"><i class="bi bi-list-ul me-2"></i>View All</a></li>
                             {% if not current_user.is_read_only() %}
-                            <li><a class="dropdown-item" href="{{ url_for('expenses.create') }}">New Entry</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('expenses.create') }}"><i class="bi bi-plus-circle me-2"></i>New Entry</a></li>
                             {% endif %}
                         </ul>
                     </li>
@@ -53,10 +59,10 @@
                             <i class="bi bi-journal-text"></i> Accounts
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('accounts.index') }}">Chart of Accounts</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('accounts.trial_balance') }}">Trial Balance</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('accounts.income_expenditure') }}">Income & Expenditure</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('accounts.balance_sheet') }}">Balance Sheet</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('accounts.index') }}"><i class="bi bi-diagram-3 me-2"></i>Chart of Accounts</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('accounts.trial_balance') }}"><i class="bi bi-calculator me-2"></i>Trial Balance</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('accounts.income_expenditure') }}"><i class="bi bi-graph-up-arrow me-2"></i>Income & Expenditure</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('accounts.balance_sheet') }}"><i class="bi bi-file-spreadsheet me-2"></i>Balance Sheet</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
@@ -64,11 +70,11 @@
                             <i class="bi bi-file-earmark-bar-graph"></i> Reports
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('reports.index') }}">Report Center</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('reports.daily') }}">Daily Report</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('reports.monthly') }}">Monthly Report</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('reports.donor') }}">Donor Report</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('reports.fund_summary') }}">Fund Summary</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('reports.index') }}"><i class="bi bi-grid me-2"></i>Report Center</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('reports.daily') }}"><i class="bi bi-calendar-day me-2"></i>Daily Report</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('reports.monthly') }}"><i class="bi bi-calendar-month me-2"></i>Monthly Report</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('reports.donor') }}"><i class="bi bi-people me-2"></i>Donor Report</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('reports.fund_summary') }}"><i class="bi bi-pie-chart me-2"></i>Fund Summary</a></li>
                         </ul>
                     </li>
                     {% if current_user.role == 'admin' or current_user.role == 'auditor' %}
@@ -78,10 +84,10 @@
                         </a>
                         <ul class="dropdown-menu">
                             {% if current_user.role == 'admin' %}
-                            <li><a class="dropdown-item" href="{{ url_for('admin.index') }}">User Management</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin.period_locks') }}">Period Locks</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.index') }}"><i class="bi bi-people-fill me-2"></i>User Management</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.period_locks') }}"><i class="bi bi-lock me-2"></i>Period Locks</a></li>
                             {% endif %}
-                            <li><a class="dropdown-item" href="{{ url_for('admin.audit_log') }}">Audit Log</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.audit_log') }}"><i class="bi bi-clock-history me-2"></i>Audit Log</a></li>
                         </ul>
                     </li>
                     {% endif %}
@@ -90,12 +96,12 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle"></i> {{ current_user.full_name }}
-                            <span class="badge bg-light text-dark">{{ current_user.role }}</span>
+                            <span class="badge bg-light text-dark ms-1">{{ current_user.role }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">Profile</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}"><i class="bi bi-person me-2"></i>Profile</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -108,7 +114,8 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                <div class="alert alert-{{ category }} alert-dismissible fade show animate-fade-in" role="alert">
+                    <i class="bi bi-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-triangle{% elif category == 'warning' %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -119,9 +126,10 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="footer mt-auto py-3 bg-light">
-        <div class="container text-center">
-            <span class="text-muted">Masjid Accounting System &copy; {{ now().year if now is defined else '2024' }}</span>
+    <footer class="footer">
+        <div class="container">
+            <span class="footer-brand">{{ config.MOSQUE_NAME }}</span>
+            <span>Accounting Management System {{ now().year if now is defined else '2024' }}</span>
         </div>
     </footer>
 

@@ -1,67 +1,96 @@
 {% extends "base.html" %}
 
-{% block title %}Profile - Masjid Accounting{% endblock %}
+{% block title %}Profile - {{ config.MOSQUE_NAME }}{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-lg-6 mx-auto">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0"><i class="bi bi-person-circle"></i> My Profile</h5>
+        <div class="text-center mb-4">
+            <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 100px; height: 100px;">
+                <i class="bi bi-person-circle fs-1 text-primary"></i>
+            </div>
+            <h3 class="mb-1">{{ current_user.full_name }}</h3>
+            <span class="badge bg-success px-3 py-2">{{ current_user.role|title }}</span>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-person-circle me-2"></i>My Profile</h5>
             </div>
             <div class="card-body">
                 <form method="POST">
                     <input type="hidden" name="action" value="update_profile">
                     <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" value="{{ current_user.username }}" disabled>
+                        <label for="username" class="form-label fw-medium">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-at"></i></span>
+                            <input type="text" class="form-control" id="username" value="{{ current_user.username }}" disabled>
+                        </div>
                     </div>
                     <div class="mb-3">
-                        <label for="full_name" class="form-label">Full Name</label>
-                        <input type="text" class="form-control" id="full_name" name="full_name" 
-                               value="{{ current_user.full_name }}" required>
+                        <label for="full_name" class="form-label fw-medium">Full Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control" id="full_name" name="full_name" 
+                                   value="{{ current_user.full_name }}" required>
+                        </div>
                     </div>
                     <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" 
-                               value="{{ current_user.email }}" required>
+                        <label for="email" class="form-label fw-medium">Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{ current_user.email }}" required>
+                        </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Role</label>
-                        <input type="text" class="form-control" value="{{ current_user.role }}" disabled>
+                        <label class="form-label fw-medium">Role</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-shield"></i></span>
+                            <input type="text" class="form-control" value="{{ current_user.role|title }}" disabled>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-success">
-                        <i class="bi bi-check-lg"></i> Update Profile
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-check-lg me-1"></i> Update Profile
                     </button>
                 </form>
             </div>
         </div>
 
-        <div class="card shadow mt-4">
-            <div class="card-header bg-warning">
-                <h5 class="mb-0"><i class="bi bi-key"></i> Change Password</h5>
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning bg-opacity-10">
+                <h5 class="mb-0"><i class="bi bi-key me-2"></i>Change Password</h5>
             </div>
             <div class="card-body">
                 <form method="POST">
                     <input type="hidden" name="action" value="change_password">
                     <div class="mb-3">
-                        <label for="current_password" class="form-label">Current Password</label>
-                        <input type="password" class="form-control" id="current_password" 
-                               name="current_password" required>
+                        <label for="current_password" class="form-label fw-medium">Current Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control" id="current_password" 
+                                   name="current_password" required>
+                        </div>
                     </div>
                     <div class="mb-3">
-                        <label for="new_password" class="form-label">New Password</label>
-                        <input type="password" class="form-control" id="new_password" 
-                               name="new_password" required minlength="8">
-                        <div class="form-text">Minimum 8 characters</div>
+                        <label for="new_password" class="form-label fw-medium">New Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                            <input type="password" class="form-control" id="new_password" 
+                                   name="new_password" required minlength="8">
+                        </div>
+                        <div class="form-text"><i class="bi bi-info-circle me-1"></i>Minimum 8 characters</div>
                     </div>
                     <div class="mb-3">
-                        <label for="confirm_password" class="form-label">Confirm New Password</label>
-                        <input type="password" class="form-control" id="confirm_password" 
-                               name="confirm_password" required>
+                        <label for="confirm_password" class="form-label fw-medium">Confirm New Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-check-circle"></i></span>
+                            <input type="password" class="form-control" id="confirm_password" 
+                                   name="confirm_password" required>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-warning">
-                        <i class="bi bi-key"></i> Change Password
+                    <button type="submit" class="btn btn-warning w-100">
+                        <i class="bi bi-key me-1"></i> Change Password
                     </button>
                 </form>
             </div>

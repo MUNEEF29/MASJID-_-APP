@@ -1,28 +1,33 @@
 {% extends "base.html" %}
 
-{% block title %}Donor Report - Masjid Accounting{% endblock %}
+{% block title %}Donor Report - {{ config.MOSQUE_NAME }}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="bi bi-people"></i> Donor Report</h2>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="page-title mb-1"><i class="bi bi-people me-2"></i>Donor Report</h2>
+        <p class="text-muted mb-0">Contributions grouped by donor</p>
+    </div>
 </div>
 
 <div class="card mb-4">
     <div class="card-body">
         <form method="GET" class="row g-3">
             <div class="col-md-4">
-                <label class="form-label">Start Date</label>
+                <label class="form-label fw-medium">Start Date</label>
                 <input type="date" class="form-control" name="start_date" value="{{ start_date }}">
             </div>
             <div class="col-md-4">
-                <label class="form-label">End Date</label>
+                <label class="form-label fw-medium">End Date</label>
                 <input type="date" class="form-control" name="end_date" value="{{ end_date }}">
             </div>
-            <div class="col-md-4 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary me-2">
-                    <i class="bi bi-search"></i> Generate
+            <div class="col-md-4 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-search me-1"></i> Generate
                 </button>
-                <a href="{{ url_for('reports.donor') }}" class="btn btn-outline-secondary">Clear</a>
+                <a href="{{ url_for('reports.donor') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-lg"></i>
+                </a>
             </div>
         </form>
     </div>
@@ -30,12 +35,12 @@
 
 <div class="card">
     <div class="card-header">
-        <h5 class="mb-0">Donor Contributions</h5>
+        <h5 class="mb-0"><i class="bi bi-heart me-2"></i>Donor Contributions</h5>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
-                <thead class="table-light">
+                <thead>
                     <tr>
                         <th>#</th>
                         <th>Donor Name</th>
@@ -46,23 +51,26 @@
                 <tbody>
                     {% for donor in donor_totals %}
                     <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>{{ donor.donor_name }}</td>
-                        <td class="text-center">{{ donor.count }}</td>
-                        <td class="text-end fw-bold">{{ "{:,.2f}".format(donor.total) }}</td>
+                        <td class="text-muted">{{ loop.index }}</td>
+                        <td><i class="bi bi-person me-2 text-primary"></i>{{ donor.donor_name }}</td>
+                        <td class="text-center"><span class="badge bg-secondary">{{ donor.count }}</span></td>
+                        <td class="text-end fw-bold text-success">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(donor.total) }}</td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4" class="text-center text-muted py-4">No donor data found</td>
+                        <td colspan="4" class="text-center text-muted py-5">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No donor data found
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
                 {% if donor_totals %}
-                <tfoot class="table-light">
+                <tfoot class="table-success">
                     <tr>
-                        <th colspan="2">Total</th>
+                        <th colspan="2"><i class="bi bi-calculator me-2"></i>Total</th>
                         <th class="text-center">{{ donor_totals | sum(attribute='count') }}</th>
-                        <th class="text-end">{{ "{:,.2f}".format(donor_totals | sum(attribute='total')) }}</th>
+                        <th class="text-end">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(donor_totals | sum(attribute='total')) }}</th>
                     </tr>
                 </tfoot>
                 {% endif %}

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ expense.voucher_number }} - Masjid Accounting{% endblock %}
+{% block title %}{{ expense.voucher_number }} - {{ config.MOSQUE_NAME }}{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -48,7 +48,7 @@
                             {% endif %}
                             <tr>
                                 <th class="text-muted">Amount</th>
-                                <td><strong class="fs-4 text-danger">{{ "{:,.2f}".format(expense.amount) }}</strong></td>
+                                <td><strong class="fs-4 text-danger">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(expense.amount) }}</strong></td>
                             </tr>
                             <tr>
                                 <th class="text-muted">Entered By</th>

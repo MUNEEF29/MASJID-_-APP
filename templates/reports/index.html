@@ -1,71 +1,83 @@
 {% extends "base.html" %}
 
-{% block title %}Report Center - Masjid Accounting{% endblock %}
+{% block title %}Report Center - {{ config.MOSQUE_NAME }}{% endblock %}
 
 {% block content %}
 <div class="mb-4">
-    <h2><i class="bi bi-file-earmark-bar-graph"></i> Report Center</h2>
+    <h2 class="page-title mb-1"><i class="bi bi-file-earmark-bar-graph me-2"></i>Report Center</h2>
     <p class="text-muted">Generate and export financial reports</p>
 </div>
 
 <div class="row g-4">
     <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="bi bi-calendar-day fs-1 text-primary"></i>
-                <h5 class="card-title mt-3">Daily Report</h5>
-                <p class="card-text text-muted">View income and expenses for a specific day</p>
-                <a href="{{ url_for('reports.daily') }}" class="btn btn-primary">View Report</a>
+        <div class="card h-100 quick-action-btn" style="cursor: pointer;" onclick="window.location='{{ url_for('reports.daily') }}'">
+            <div class="card-body text-center py-4">
+                <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-calendar-day fs-2 text-primary"></i>
+                </div>
+                <h5 class="card-title">Daily Report</h5>
+                <p class="card-text text-muted small">View income and expenses for a specific day</p>
+                <span class="btn btn-primary mt-2">View Report</span>
             </div>
         </div>
     </div>
     <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="bi bi-calendar-month fs-1 text-success"></i>
-                <h5 class="card-title mt-3">Monthly Report</h5>
-                <p class="card-text text-muted">Summary by category for a specific month</p>
-                <a href="{{ url_for('reports.monthly') }}" class="btn btn-success">View Report</a>
+        <div class="card h-100 quick-action-btn" style="cursor: pointer;" onclick="window.location='{{ url_for('reports.monthly') }}'">
+            <div class="card-body text-center py-4">
+                <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-calendar-month fs-2 text-success"></i>
+                </div>
+                <h5 class="card-title">Monthly Report</h5>
+                <p class="card-text text-muted small">Summary by category for a specific month</p>
+                <span class="btn btn-success mt-2">View Report</span>
             </div>
         </div>
     </div>
     <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="bi bi-people fs-1 text-info"></i>
-                <h5 class="card-title mt-3">Donor Report</h5>
-                <p class="card-text text-muted">Contributions grouped by donor</p>
-                <a href="{{ url_for('reports.donor') }}" class="btn btn-info">View Report</a>
+        <div class="card h-100 quick-action-btn" style="cursor: pointer;" onclick="window.location='{{ url_for('reports.donor') }}'">
+            <div class="card-body text-center py-4">
+                <div class="rounded-circle bg-info bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-people fs-2 text-info"></i>
+                </div>
+                <h5 class="card-title">Donor Report</h5>
+                <p class="card-text text-muted small">Contributions grouped by donor</p>
+                <span class="btn btn-info mt-2">View Report</span>
             </div>
         </div>
     </div>
     <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="bi bi-pie-chart fs-1 text-warning"></i>
-                <h5 class="card-title mt-3">Fund Summary</h5>
-                <p class="card-text text-muted">Overview of all fund balances</p>
-                <a href="{{ url_for('reports.fund_summary') }}" class="btn btn-warning">View Report</a>
+        <div class="card h-100 quick-action-btn" style="cursor: pointer;" onclick="window.location='{{ url_for('reports.fund_summary') }}'">
+            <div class="card-body text-center py-4">
+                <div class="rounded-circle bg-warning bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-pie-chart fs-2 text-warning"></i>
+                </div>
+                <h5 class="card-title">Fund Summary</h5>
+                <p class="card-text text-muted small">Overview of all fund balances</p>
+                <span class="btn btn-warning mt-2">View Report</span>
             </div>
         </div>
     </div>
     <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="bi bi-clipboard-data fs-1 text-secondary"></i>
-                <h5 class="card-title mt-3">Trial Balance</h5>
-                <p class="card-text text-muted">Double-entry accounting verification</p>
-                <a href="{{ url_for('accounts.trial_balance') }}" class="btn btn-secondary">View Report</a>
+        <div class="card h-100 quick-action-btn" style="cursor: pointer;" onclick="window.location='{{ url_for('accounts.trial_balance') }}'">
+            <div class="card-body text-center py-4">
+                <div class="rounded-circle bg-secondary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-clipboard-data fs-2 text-secondary"></i>
+                </div>
+                <h5 class="card-title">Trial Balance</h5>
+                <p class="card-text text-muted small">Double-entry accounting verification</p>
+                <span class="btn btn-secondary mt-2">View Report</span>
             </div>
         </div>
     </div>
     <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="bi bi-clipboard-check fs-1 text-danger"></i>
-                <h5 class="card-title mt-3">Balance Sheet</h5>
-                <p class="card-text text-muted">Assets, liabilities, and fund balances</p>
-                <a href="{{ url_for('accounts.balance_sheet') }}" class="btn btn-danger">View Report</a>
+        <div class="card h-100 quick-action-btn" style="cursor: pointer;" onclick="window.location='{{ url_for('accounts.balance_sheet') }}'">
+            <div class="card-body text-center py-4">
+                <div class="rounded-circle bg-danger bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-clipboard-check fs-2 text-danger"></i>
+                </div>
+                <h5 class="card-title">Balance Sheet</h5>
+                <p class="card-text text-muted small">Assets, liabilities, and fund balances</p>
+                <span class="btn btn-danger mt-2">View Report</span>
             </div>
         </div>
     </div>
@@ -73,29 +85,29 @@
 
 <div class="card mt-5">
     <div class="card-header">
-        <h5 class="mb-0"><i class="bi bi-download"></i> Export Data</h5>
+        <h5 class="mb-0"><i class="bi bi-download me-2"></i>Export Data</h5>
     </div>
     <div class="card-body">
         <div class="row g-3">
             <div class="col-md-6">
-                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3 border">
                     <div>
-                        <h6 class="mb-0">Income Data</h6>
+                        <h6 class="mb-1"><i class="bi bi-cash-stack text-success me-2"></i>Income Data</h6>
                         <small class="text-muted">Export all income records to CSV</small>
                     </div>
                     <a href="{{ url_for('reports.export_income_csv') }}" class="btn btn-outline-success">
-                        <i class="bi bi-filetype-csv"></i> Export CSV
+                        <i class="bi bi-filetype-csv me-1"></i> Export
                     </a>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3 border">
                     <div>
-                        <h6 class="mb-0">Expense Data</h6>
+                        <h6 class="mb-1"><i class="bi bi-credit-card text-danger me-2"></i>Expense Data</h6>
                         <small class="text-muted">Export all expense records to CSV</small>
                     </div>
                     <a href="{{ url_for('reports.export_expense_csv') }}" class="btn btn-outline-danger">
-                        <i class="bi bi-filetype-csv"></i> Export CSV
+                        <i class="bi bi-filetype-csv me-1"></i> Export
                     </a>
                 </div>
             </div>
