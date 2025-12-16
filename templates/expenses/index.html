@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Expenses - Masjid Accounting{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-credit-card"></i> Expense Management</h2>
+    {% if not current_user.is_read_only() %}
+    <a href="{{ url_for('expenses.create') }}" class="btn btn-danger">
+        <i class="bi bi-plus-lg"></i> New Entry
+    </a>
+    {% endif %}
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Verification</label>
+                <select name="status" class="form-select">
+                    <option value="">All</option>
+                    {% for status in verification_statuses %}
+                    <option value="{{ status }}" {% if status == current_status %}selected{% endif %}>
+                        {{ status|title }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Approval</label>
+                <select name="approval" class="form-select">
+                    <option value="">All</option>
+                    {% for status in approval_statuses %}
+                    <option value="{{ status }}" {% if status == current_approval %}selected{% endif %}>
+                        {{ status|title }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Category</label>
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}" {% if cat == current_category %}selected{% endif %}>
+                        {{ category_names[cat] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-funnel"></i> Filter
+                </button>
+                <a href="{{ url_for('expenses.index') }}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Voucher #</th>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Payee</th>
+                        <th class="text-end">Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses.items %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('expenses.view', id=expense.id) }}">{{ expense.voucher_number }}</a>
+                        </td>
+                        <td>{{ expense.date.strftime('%d %b %Y') }}</td>
+                        <td>
+                            <span class="badge bg-secondary">{{ category_names.get(expense.category, expense.category) }}</span>
+                        </td>
+                        <td>{{ expense.payee[:30] }}{% if expense.payee|length > 30 %}...{% endif %}</td>
+                        <td class="text-end fw-bold">{{ "{:,.2f}".format(expense.amount) }}</td>
+                        <td>
+                            {% if expense.approval_status == 'approved' %}
+                            <span class="badge bg-success">Approved</span>
+                            {% elif expense.verification_status == 'verified' and expense.approval_status == 'pending' %}
+                            <span class="badge bg-info">Awaiting Approval</span>
+                            {% elif expense.verification_status == 'pending' %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                            {% elif expense.verification_status == 'rejected' or expense.approval_status == 'rejected' %}
+                            <span class="badge bg-danger">Rejected</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('expenses.view', id=expense.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No expense entries found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if expenses.pages > 1 %}
+    <div class="card-footer">
+        <nav>
+            <ul class="pagination mb-0 justify-content-center">
+                {% if expenses.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('expenses.index', page=expenses.prev_num) }}">Previous</a>
+                </li>
+                {% endif %}
+                {% for page in expenses.iter_pages() %}
+                    {% if page %}
+                    <li class="page-item {% if page == expenses.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('expenses.index', page=page) }}">{{ page }}</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+                {% if expenses.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('expenses.index', page=expenses.next_num) }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

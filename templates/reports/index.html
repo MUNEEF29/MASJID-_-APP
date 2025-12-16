@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Report Center - Masjid Accounting{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2><i class="bi bi-file-earmark-bar-graph"></i> Report Center</h2>
+    <p class="text-muted">Generate and export financial reports</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-calendar-day fs-1 text-primary"></i>
+                <h5 class="card-title mt-3">Daily Report</h5>
+                <p class="card-text text-muted">View income and expenses for a specific day</p>
+                <a href="{{ url_for('reports.daily') }}" class="btn btn-primary">View Report</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-calendar-month fs-1 text-success"></i>
+                <h5 class="card-title mt-3">Monthly Report</h5>
+                <p class="card-text text-muted">Summary by category for a specific month</p>
+                <a href="{{ url_for('reports.monthly') }}" class="btn btn-success">View Report</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-people fs-1 text-info"></i>
+                <h5 class="card-title mt-3">Donor Report</h5>
+                <p class="card-text text-muted">Contributions grouped by donor</p>
+                <a href="{{ url_for('reports.donor') }}" class="btn btn-info">View Report</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-pie-chart fs-1 text-warning"></i>
+                <h5 class="card-title mt-3">Fund Summary</h5>
+                <p class="card-text text-muted">Overview of all fund balances</p>
+                <a href="{{ url_for('reports.fund_summary') }}" class="btn btn-warning">View Report</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-clipboard-data fs-1 text-secondary"></i>
+                <h5 class="card-title mt-3">Trial Balance</h5>
+                <p class="card-text text-muted">Double-entry accounting verification</p>
+                <a href="{{ url_for('accounts.trial_balance') }}" class="btn btn-secondary">View Report</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-clipboard-check fs-1 text-danger"></i>
+                <h5 class="card-title mt-3">Balance Sheet</h5>
+                <p class="card-text text-muted">Assets, liabilities, and fund balances</p>
+                <a href="{{ url_for('accounts.balance_sheet') }}" class="btn btn-danger">View Report</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-5">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-download"></i> Export Data</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                    <div>
+                        <h6 class="mb-0">Income Data</h6>
+                        <small class="text-muted">Export all income records to CSV</small>
+                    </div>
+                    <a href="{{ url_for('reports.export_income_csv') }}" class="btn btn-outline-success">
+                        <i class="bi bi-filetype-csv"></i> Export CSV
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                    <div>
+                        <h6 class="mb-0">Expense Data</h6>
+                        <small class="text-muted">Export all expense records to CSV</small>
+                    </div>
+                    <a href="{{ url_for('reports.export_expense_csv') }}" class="btn btn-outline-danger">
+                        <i class="bi bi-filetype-csv"></i> Export CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

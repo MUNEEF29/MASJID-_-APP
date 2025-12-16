@@ -1,0 +1,144 @@
+:root {
+    --primary-green: #198754;
+    --dark-green: #1a7431;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+.navbar-brand {
+    font-weight: 600;
+}
+
+.card {
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    border-radius: 0.5rem 0.5rem 0 0 !important;
+}
+
+.table th {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge {
+    font-weight: 500;
+}
+
+.btn {
+    border-radius: 0.375rem;
+}
+
+.form-control, .form-select {
+    border-radius: 0.375rem;
+}
+
+.pagination .page-link {
+    border-radius: 0.25rem;
+    margin: 0 2px;
+}
+
+.alert {
+    border-radius: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .navbar-nav .dropdown-menu {
+        position: static;
+        float: none;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    main.container-fluid {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    .card {
+        margin-left: -0.25rem;
+        margin-right: -0.25rem;
+    }
+}
+
+.progress {
+    border-radius: 0.25rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(25, 135, 84, 0.05);
+}
+
+.modal-header {
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.text-success {
+    color: #198754 !important;
+}
+
+.bg-success {
+    background-color: #198754 !important;
+}
+
+.btn-success {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.btn-success:hover {
+    background-color: #157347;
+    border-color: #146c43;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+.input-group-text {
+    background-color: #e9ecef;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.navbar a:hover {
+    text-decoration: none;
+}
+
+.dropdown-item:active {
+    background-color: #198754;
+}

@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block title %}{{ expense.voucher_number }} - Masjid Accounting{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> {{ expense.voucher_number }}</h5>
+                {% if expense.is_reversed %}
+                <span class="badge bg-dark">REVERSED</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th class="text-muted" style="width:40%">Date</th>
+                                <td>{{ expense.date.strftime('%d %B %Y') }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Category</th>
+                                <td><span class="badge bg-secondary">{{ category_names.get(expense.category, expense.category) }}</span></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Fund Type</th>
+                                <td><span class="badge bg-info">{{ fund_names.get(expense.fund_type, expense.fund_type) }}</span></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Payee</th>
+                                <td>{{ expense.payee }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th class="text-muted" style="width:40%">Payment Mode</th>
+                                <td>{{ payment_mode_names.get(expense.payment_mode, expense.payment_mode) }}</td>
+                            </tr>
+                            {% if expense.payment_reference %}
+                            <tr>
+                                <th class="text-muted">Reference</th>
+                                <td>{{ expense.payment_reference }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <th class="text-muted">Amount</th>
+                                <td><strong class="fs-4 text-danger">{{ "{:,.2f}".format(expense.amount) }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Entered By</th>
+                                <td>{{ expense.entered_by.full_name }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="text-muted">Description</h6>
+                    <p class="mb-0">{{ expense.description }}</p>
+                </div>
+
+                {% if expense.supporting_document %}
+                <div class="mb-4">
+                    <h6 class="text-muted">Supporting Document</h6>
+                    <a href="{{ url_for('expenses.download_file', filename=expense.supporting_document) }}" 
+                       class="btn btn-outline-primary" target="_blank">
+                        <i class="bi bi-file-earmark-arrow-down"></i> Download Document
+                    </a>
+                </div>
+                {% endif %}
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Verification Status</h6>
+                            </div>
+                            <div class="card-body">
+                                {% if expense.verification_status == 'verified' %}
+                                <div class="alert alert-success mb-0">
+                                    <strong><i class="bi bi-check-circle"></i> Verified</strong><br>
+                                    <small>by {{ expense.verified_by.full_name }} on {{ expense.verified_at.strftime('%d %b %Y') }}</small>
+                                    {% if expense.verification_remarks %}
+                                    <p class="mb-0 mt-2 small">{{ expense.verification_remarks }}</p>
+                                    {% endif %}
+                                </div>
+                                {% elif expense.verification_status == 'rejected' %}
+                                <div class="alert alert-danger mb-0">
+                                    <strong><i class="bi bi-x-circle"></i> Rejected</strong><br>
+                                    <small>by {{ expense.verified_by.full_name }}</small>
+                                    {% if expense.verification_remarks %}
+                                    <p class="mb-0 mt-2 small">{{ expense.verification_remarks }}</p>
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                <div class="alert alert-warning mb-0">
+                                    <strong><i class="bi bi-hourglass-split"></i> Pending</strong>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Approval Status</h6>
+                            </div>
+                            <div class="card-body">
+                                {% if expense.approval_status == 'approved' %}
+                                <div class="alert alert-success mb-0">
+                                    <strong><i class="bi bi-check-circle"></i> Approved</strong><br>
+                                    <small>by {{ expense.approved_by.full_name }} on {{ expense.approved_at.strftime('%d %b %Y') }}</small>
+                                    {% if expense.approval_remarks %}
+                                    <p class="mb-0 mt-2 small">{{ expense.approval_remarks }}</p>
+                                    {% endif %}
+                                </div>
+                                {% elif expense.approval_status == 'rejected' %}
+                                <div class="alert alert-danger mb-0">
+                                    <strong><i class="bi bi-x-circle"></i> Rejected</strong><br>
+                                    <small>by {{ expense.approved_by.full_name }}</small>
+                                    {% if expense.approval_remarks %}
+                                    <p class="mb-0 mt-2 small">{{ expense.approval_remarks }}</p>
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                <div class="alert alert-secondary mb-0">
+                                    <strong><i class="bi bi-hourglass-split"></i> Pending</strong>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if not current_user.is_read_only() %}
+                <div class="d-flex gap-2 flex-wrap">
+                    {% if expense.verification_status == 'pending' and current_user.has_permission('verify_expense') and expense.entered_by_id != current_user.id %}
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#verifyModal">
+                        <i class="bi bi-check-lg"></i> Verify
+                    </button>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectVerifyModal">
+                        <i class="bi bi-x-lg"></i> Reject Verification
+                    </button>
+                    {% endif %}
+                    
+                    {% if expense.verification_status == 'verified' and expense.approval_status == 'pending' and current_user.has_permission('approve_expense') and expense.entered_by_id != current_user.id %}
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#approveModal">
+                        <i class="bi bi-hand-thumbs-up"></i> Approve
+                    </button>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectApproveModal">
+                        <i class="bi bi-hand-thumbs-down"></i> Reject
+                    </button>
+                    {% endif %}
+                    
+                    {% if expense.approval_status == 'approved' and not expense.is_reversed %}
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#reverseModal">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reverse Entry
+                    </button>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('expenses.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if expense.verification_status == 'pending' %}
+<div class="modal fade" id="verifyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('expenses.verify', id=expense.id) }}">
+                <input type="hidden" name="action" value="verify">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Verify Expense</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Verification Remarks <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="remarks" required rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Verify</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="rejectVerifyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('expenses.verify', id=expense.id) }}">
+                <input type="hidden" name="action" value="reject">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Reject Verification</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Rejection Reason <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="remarks" required rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Reject</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if expense.verification_status == 'verified' and expense.approval_status == 'pending' %}
+<div class="modal fade" id="approveModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('expenses.approve', id=expense.id) }}">
+                <input type="hidden" name="action" value="approve">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Approve Expense</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Approval Remarks <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="remarks" required rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Approve</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="rejectApproveModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('expenses.approve', id=expense.id) }}">
+                <input type="hidden" name="action" value="reject">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Reject Expense</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Rejection Reason <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="remarks" required rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Reject</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if expense.approval_status == 'approved' and not expense.is_reversed %}
+<div class="modal fade" id="reverseModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('expenses.reverse', id=expense.id) }}">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">Reverse Expense Entry</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> This action cannot be undone. A reversal entry will be created.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Reversal Reason <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="remarks" required rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Reverse Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

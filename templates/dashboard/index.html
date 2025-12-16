@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Masjid Accounting{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
+    <span class="text-muted">Welcome, {{ current_user.full_name }}</span>
+</div>
+
+{% if alerts %}
+<div class="row mb-4">
+    <div class="col-12">
+        {% for alert in alerts %}
+        <div class="alert alert-{{ alert.type }} d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ alert.message }}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-4 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-subtitle mb-2">Cash Balance</h6>
+                        <h4 class="card-title mb-0">{{ "{:,.2f}".format(cash_balance) }}</h4>
+                    </div>
+                    <i class="bi bi-cash-coin fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-subtitle mb-2">Bank Balance</h6>
+                        <h4 class="card-title mb-0">{{ "{:,.2f}".format(bank_balance) }}</h4>
+                    </div>
+                    <i class="bi bi-bank fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-subtitle mb-2">Monthly Income</h6>
+                        <h4 class="card-title mb-0">{{ "{:,.2f}".format(monthly_income) }}</h4>
+                    </div>
+                    <i class="bi bi-arrow-up-circle fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card bg-danger text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-subtitle mb-2">Monthly Expense</h6>
+                        <h4 class="card-title mb-0">{{ "{:,.2f}".format(monthly_expense) }}</h4>
+                    </div>
+                    <i class="bi bi-arrow-down-circle fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-header bg-warning">
+                <h6 class="mb-0"><i class="bi bi-hourglass-split"></i> Pending Approvals</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Income Verification
+                        <span class="badge bg-warning text-dark rounded-pill">{{ pending_income_verification }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Expense Verification
+                        <span class="badge bg-warning text-dark rounded-pill">{{ pending_expense_verification }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Expense Approval
+                        <span class="badge bg-danger rounded-pill">{{ pending_expense_approval }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-success">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0"><i class="bi bi-heart"></i> Zakat Fund Status</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Collected</span>
+                        <strong>{{ "{:,.2f}".format(zakat_collected) }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Distributed</span>
+                        <strong>{{ "{:,.2f}".format(zakat_distributed) }}</strong>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span>Available</span>
+                        <strong class="text-success">{{ "{:,.2f}".format(zakat_collected - zakat_distributed) }}</strong>
+                    </div>
+                </div>
+                <div class="progress" style="height: 25px;">
+                    {% set pct = (zakat_distributed / zakat_collected * 100) if zakat_collected > 0 else 0 %}
+                    <div class="progress-bar bg-success" style="width: {{ pct }}%">
+                        {{ "{:.1f}".format(pct) }}% Distributed
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-graph-up"></i> Income vs Expense Trend</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="bi bi-cash-stack"></i> Recent Income</h6>
+                <a href="{{ url_for('income.index') }}" class="btn btn-sm btn-outline-success">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Receipt</th>
+                                <th>Source</th>
+                                <th class="text-end">Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for income in recent_income %}
+                            <tr>
+                                <td><a href="{{ url_for('income.view', id=income.id) }}">{{ income.receipt_number }}</a></td>
+                                <td>{{ income.source[:20] }}{% if income.source|length > 20 %}...{% endif %}</td>
+                                <td class="text-end">{{ "{:,.2f}".format(income.amount) }}</td>
+                                <td>
+                                    {% if income.verification_status == 'verified' %}
+                                    <span class="badge bg-success">Verified</span>
+                                    {% elif income.verification_status == 'pending' %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-center text-muted">No recent income</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="bi bi-credit-card"></i> Recent Expenses</h6>
+                <a href="{{ url_for('expenses.index') }}" class="btn btn-sm btn-outline-danger">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Voucher</th>
+                                <th>Payee</th>
+                                <th class="text-end">Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for expense in recent_expenses %}
+                            <tr>
+                                <td><a href="{{ url_for('expenses.view', id=expense.id) }}">{{ expense.voucher_number }}</a></td>
+                                <td>{{ expense.payee[:20] }}{% if expense.payee|length > 20 %}...{% endif %}</td>
+                                <td class="text-end">{{ "{:,.2f}".format(expense.amount) }}</td>
+                                <td>
+                                    {% if expense.approval_status == 'approved' %}
+                                    <span class="badge bg-success">Approved</span>
+                                    {% elif expense.approval_status == 'pending' %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-center text-muted">No recent expenses</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_months | tojson }},
+            datasets: [{
+                label: 'Income',
+                data: {{ chart_income | tojson }},
+                borderColor: '#198754',
+                backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                fill: true,
+                tension: 0.3
+            }, {
+                label: 'Expense',
+                data: {{ chart_expense | tojson }},
+                borderColor: '#dc3545',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

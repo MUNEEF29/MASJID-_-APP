@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Period Locks - Masjid Accounting{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-lock"></i> Period Locks</h2>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Lock New Period</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.create_period_lock') }}">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="year" class="form-label">Year</label>
+                            <select class="form-select" id="year" name="year" required>
+                                {% for y in range(2020, 2030) %}
+                                <option value="{{ y }}">{{ y }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="month" class="form-label">Month</label>
+                            <select class="form-select" id="month" name="month" required>
+                                {% for m in range(1, 13) %}
+                                <option value="{{ m }}">
+                                    {{ ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][m-1] }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="remarks" class="form-label">Remarks</label>
+                        <textarea class="form-control" id="remarks" name="remarks" rows="2"
+                                  placeholder="Reason for locking this period..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-lock"></i> Lock Period
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Locked Periods</h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Period</th>
+                            <th>Locked By</th>
+                            <th>Locked At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lock in locks %}
+                        <tr>
+                            <td>
+                                <strong>
+                                    {{ ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][lock.month-1] }} {{ lock.year }}
+                                </strong>
+                            </td>
+                            <td>{{ lock.locked_by.full_name }}</td>
+                            <td>{{ lock.locked_at.strftime('%d %b %Y %H:%M') }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">No periods locked</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-info mt-4">
+    <i class="bi bi-info-circle"></i>
+    <strong>Note:</strong> Once a period is locked, no entries can be created or modified for that month. 
+    This ensures the integrity of closed accounting periods for audit purposes.
+</div>
+{% endblock %}

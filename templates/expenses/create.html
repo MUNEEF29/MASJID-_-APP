@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}New Expense Entry - Masjid Accounting{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-plus-circle"></i> New Expense Entry</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="date" class="form-label">Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="date" name="date" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
+                            <select class="form-select" id="category" name="category" required>
+                                <option value="">Select Category</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat }}">{{ category_names[cat] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="fund_type" class="form-label">Fund Type <span class="text-danger">*</span></label>
+                            <select class="form-select" id="fund_type" name="fund_type" required>
+                                {% for fund in funds %}
+                                <option value="{{ fund }}">{{ fund_names[fund] }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text" id="fundHelp"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="payment_mode" class="form-label">Payment Mode <span class="text-danger">*</span></label>
+                            <select class="form-select" id="payment_mode" name="payment_mode" required>
+                                <option value="">Select Payment Mode</option>
+                                {% for mode in payment_modes %}
+                                <option value="{{ mode }}">{{ payment_mode_names[mode] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="payee" class="form-label">Payee <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="payee" name="payee" required
+                               placeholder="Name of person/company receiving payment">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="description" name="description" required rows="3"
+                                  placeholder="Detailed description of the expense..."></textarea>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" min="0.01" class="form-control" id="amount" 
+                                       name="amount" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="payment_reference" class="form-label">Payment Reference</label>
+                            <input type="text" class="form-control" id="payment_reference" name="payment_reference"
+                                   placeholder="Transaction ID, Cheque No., etc.">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="supporting_document" class="form-label">Supporting Document</label>
+                        <input type="file" class="form-control" id="supporting_document" name="supporting_document"
+                               accept=".pdf,.png,.jpg,.jpeg,.gif">
+                        <div class="form-text">Upload receipt, invoice, or other supporting document (PDF, PNG, JPG - max 16MB)</div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-check-lg"></i> Create Entry
+                        </button>
+                        <a href="{{ url_for('expenses.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    
+    document.getElementById('category').addEventListener('change', function() {
+        const fundSelect = document.getElementById('fund_type');
+        const helpText = document.getElementById('fundHelp');
+        
+        if (this.value === 'charity') {
+            helpText.innerHTML = '<span class="text-info"><i class="bi bi-info-circle"></i> Select Zakat Fund for Zakat distribution</span>';
+        } else {
+            helpText.innerHTML = '';
+        }
+    });
+});
+</script>
+{% endblock %}

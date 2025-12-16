@@ -1,2 +1,36 @@
+modules = ["python-3.11"]
 [agent]
 expertMode = true
+integrations = ["python_database:1.0.0"]
+
+[nix]
+channel = "stable-25_05"
+packages = ["freetype", "glibcLocales"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Masjid Accounting App"
+
+[[workflows.workflow]]
+name = "Masjid Accounting App"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python app.py"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[ports]]
+localPort = 5000
+externalPort = 80

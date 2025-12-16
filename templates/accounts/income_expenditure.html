@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Income & Expenditure Statement - Masjid Accounting{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-graph-up-arrow"></i> Income & Expenditure Statement</h2>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Start Date</label>
+                <input type="date" class="form-control" name="start_date" value="{{ start_date }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">End Date</label>
+                <input type="date" class="form-control" name="end_date" value="{{ end_date }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Fund</label>
+                <select name="fund" class="form-select">
+                    <option value="">All Funds</option>
+                    {% for fund in funds %}
+                    <option value="{{ fund }}" {% if fund == fund_filter %}selected{% endif %}>
+                        {{ fund_names[fund] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">Generate</button>
+                <a href="{{ url_for('accounts.income_expenditure') }}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100 border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-arrow-up-circle"></i> Income</h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <tbody>
+                        {% for item in income_data %}
+                        <tr>
+                            <td>{{ item.account.name }}</td>
+                            <td class="text-end">{{ "{:,.2f}".format(item.amount) }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="2" class="text-center text-muted">No income</td></tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-success">
+                        <tr>
+                            <th>Total Income</th>
+                            <th class="text-end">{{ "{:,.2f}".format(total_income) }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100 border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-arrow-down-circle"></i> Expenditure</h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <tbody>
+                        {% for item in expense_data %}
+                        <tr>
+                            <td>{{ item.account.name }}</td>
+                            <td class="text-end">{{ "{:,.2f}".format(item.amount) }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="2" class="text-center text-muted">No expenditure</td></tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-danger">
+                        <tr>
+                            <th>Total Expenditure</th>
+                            <th class="text-end">{{ "{:,.2f}".format(total_expense) }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body text-center">
+        <h4>
+            {% if surplus_deficit >= 0 %}
+            <span class="text-success">Surplus: {{ "{:,.2f}".format(surplus_deficit) }}</span>
+            {% else %}
+            <span class="text-danger">Deficit: {{ "{:,.2f}".format(surplus_deficit|abs) }}</span>
+            {% endif %}
+        </h4>
+    </div>
+</div>
+{% endblock %}
