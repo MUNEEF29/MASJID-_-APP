@@ -1,0 +1,251 @@
+Act as a senior full-stack engineer + professional accountant building a production-ready, audit-grade web application for a Masjid accountant.
+This must be serious institutional software, not a demo.
+
+TECH STACK (MANDATORY)
+
+Backend: Python + Flask
+
+Database: SQLite (dev) with easy upgrade to PostgreSQL
+
+ORM: SQLAlchemy
+
+Auth: Flask-Login
+
+Frontend: HTML, CSS, Vanilla JavaScript
+
+Styling: Clean, professional, mobile-first (Bootstrap allowed)
+
+Deployment target: Replit
+
+APPLICATION TYPE
+
+A Web-based Mobile-Friendly Accounting Application
+Optimized for:
+
+Phone use by accountant
+
+Desktop review by committee/auditor
+
+CORE FUNCTIONAL REQUIREMENTS
+1. Authentication & Roles
+
+Implement role-based access control:
+
+Admin
+
+Accountant
+
+Verifier
+
+Treasurer
+
+Auditor (read-only)
+
+Rules:
+
+No financial entry without login
+
+Sensitive actions require approval
+
+Every action logged (user + timestamp)
+
+2. Income Management Module
+
+Support:
+
+Donations (cash, bank, UPI)
+
+Zakat (strictly separate ledger)
+
+Sadaqah
+
+Fitrah
+
+Special collections
+
+Rental income
+
+Each entry must include:
+
+Date & time
+
+Source
+
+Category
+
+Payment mode
+
+Amount
+
+Auto receipt number
+
+Entered by
+
+Verification status
+
+3. Expense & Payment Module
+
+Support:
+
+Salaries
+
+Utilities
+
+Maintenance
+
+Vendor payments
+
+Charity disbursement
+
+Asset purchases
+
+Each expense must include:
+
+Voucher number
+
+Description
+
+Category
+
+Amount
+
+Payment method
+
+Supporting document upload
+
+Approval workflow
+
+No delete. Only reversal entries.
+
+4. Double-Entry Accounting (Non-Negotiable)
+
+Chart of Accounts
+
+Debit / Credit logic enforced
+
+Ledgers:
+
+General Masjid Fund
+
+Zakat Fund (ring-fenced)
+
+Amanah / Trust Fund
+
+Auto journal entries
+
+Generate:
+
+Trial Balance
+
+Income & Expenditure statement
+
+Balance Sheet (non-profit format)
+
+5. Reports & Dashboards
+
+Dashboard must show:
+
+Cash & bank balance
+
+Monthly income vs expense
+
+Pending approvals
+
+Zakat collected vs distributed
+
+Alerts for anomalies
+
+Reports:
+
+Daily / Monthly / Yearly
+
+Head-wise income & expense
+
+Donor-wise report
+
+Export to PDF & CSV
+
+6. Governance & Audit
+
+Immutable records
+
+Full audit trail
+
+Monthly lock (closed period cannot be edited)
+
+Mandatory remarks for edits
+
+Auditor role = read-only
+
+7. Islamic Compliance
+
+No interest calculations
+
+Zakat funds never mixed
+
+Amanah funds clearly tagged
+
+Transparent labeling
+
+PROJECT STRUCTURE (REPLIT FRIENDLY)
+
+Generate a clear folder structure, for example:
+
+/masjid_accounting_app
+│── app.py
+│── config.py
+│── models.py
+│── routes/
+│   ├── auth.py
+│   ├── income.py
+│   ├── expenses.py
+│   ├── reports.py
+│── templates/
+│── static/
+│   ├── css/
+│   ├── js/
+│── migrations/
+│── requirements.txt
+│── README.md
+
+CODING RULES
+
+Write clean, commented code
+
+Use Flask Blueprints
+
+Validate all inputs
+
+Secure routes properly
+
+Use reusable templates
+
+Mobile-first UI
+
+DELIVERABLES
+
+Working Flask app (runs on Replit)
+
+Database models
+
+Auth system
+
+Core accounting logic
+
+Sample data
+
+Clear README with run instructions
+
+FINAL DIRECTIVE
+
+Build this as if:
+
+It will be used daily
+
+It will be audited
+
+It must not fail or lose data
+
+No shortcuts.
+No fake features.
+Only real, working code.
