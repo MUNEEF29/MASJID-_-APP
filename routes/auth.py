@@ -29,10 +29,11 @@ def role_required(*roles):
         def decorated_function(*args, **kwargs):
             if not current_user.is_authenticated:
                 return redirect(url_for('auth.login'))
-            if current_user.role not in roles and Role.ADMIN not in roles:
-                if current_user.role != Role.ADMIN:
-                    flash('You do not have permission to access this page.', 'danger')
-                    return redirect(url_for('dashboard.index'))
+            if current_user.role == Role.ADMIN:
+                return f(*args, **kwargs)
+            if current_user.role not in roles:
+                flash('You do not have permission to access this page.', 'danger')
+                return redirect(url_for('dashboard.index'))
             return f(*args, **kwargs)
         return decorated_function
     return decorator
