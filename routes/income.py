@@ -141,11 +141,53 @@ def create():
                 payment_reference=payment_reference or None,
                 amount=amount,
                 description=description or None,
-                verification_status=VerificationStatus.PENDING,
+                verification_status=VerificationStatus.VERIFIED,
+                verified_by_id=current_user.id,
+                verified_at=datetime.utcnow(),
+                verification_remarks="Auto-verified on creation",
                 entered_by_id=current_user.id
             )
             
             db.session.add(income)
+            db.session.flush()
+            
+            income_account, asset_account = get_income_accounts(category, payment_mode)
+            
+            transaction = Transaction(
+                reference_number=f"TXN-{receipt_number}",
+                transaction_type='income',
+                date=date,
+                description=f"Income: {source} - {IncomeCategory.CATEGORY_NAMES.get(category, category)}",
+                fund_type=fund_type,
+                total_amount=amount,
+                created_by_id=current_user.id
+            )
+            db.session.add(transaction)
+            db.session.flush()
+            
+            debit_entry = JournalEntry(
+                transaction_id=transaction.id,
+                account_id=asset_account.id,
+                debit_amount=amount,
+                credit_amount=Decimal('0'),
+                date=date,
+                description=f"Receipt: {receipt_number}"
+            )
+            
+            credit_entry = JournalEntry(
+                transaction_id=transaction.id,
+                account_id=income_account.id,
+                debit_amount=Decimal('0'),
+                credit_amount=amount,
+                date=date,
+                description=f"Receipt: {receipt_number}"
+            )
+            
+            db.session.add(debit_entry)
+            db.session.add(credit_entry)
+            
+            income.transaction_id = transaction.id
+            
             db.session.commit()
             
             log_action('create', 'income', income.id, None, {
@@ -154,7 +196,7 @@ def create():
                 'category': category
             })
             
-            flash(f'Income entry created successfully. Receipt: {receipt_number}', 'success')
+            flash(f'Income entry created and posted to accounts. Receipt: {receipt_number}', 'success')
             return redirect(url_for('income.view', id=income.id))
             
         except Exception as e:

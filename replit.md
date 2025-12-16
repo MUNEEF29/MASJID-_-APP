@@ -1,7 +1,7 @@
 # Masjid e Ameer e Muaviyyah - Accounting System
 
 ## Overview
-A production-ready, audit-grade web-based accounting application designed for **Masjid e Ameer e Muaviyyah (مسجد امیر معاویہ)**. Built with Flask and PostgreSQL, featuring double-entry bookkeeping, role-based access control, and Islamic compliance features. The system uses **Pakistani Rupee (Rs.)** as the default currency.
+A production-ready, audit-grade web-based accounting application designed for **Masjid e Ameer e Muaviyyah (مسجد امیر معاویہ)**. Built with Flask and PostgreSQL, featuring double-entry bookkeeping, role-based access control, and Islamic compliance features. The system uses **Indian Rupee (₹)** as the default currency.
 
 ## Tech Stack
 - **Backend**: Python 3.11 + Flask
@@ -28,14 +28,14 @@ A production-ready, audit-grade web-based accounting application designed for **
 ### Income Management
 - Support for: Donations, Zakat, Sadaqah, Fitrah, Special Collections, Rental Income
 - Auto-generated receipt numbers
-- Verification workflow before posting to accounts
+- Automatic posting to accounts on creation (no verification required)
 - Full audit trail
-- Currency: Pakistani Rupee (Rs.)
+- Currency: Indian Rupee (₹)
 
 ### Expense Management
 - Support for: Salaries, Utilities, Maintenance, Vendor Payments, Charity Disbursement, Asset Purchases
 - Voucher system with supporting document upload
-- Two-stage approval (Verification + Approval)
+- Automatic posting to accounts on creation (no verification/approval required)
 - No deletion - only reversals allowed
 
 ### Double-Entry Accounting
@@ -62,8 +62,8 @@ A production-ready, audit-grade web-based accounting application designed for **
 MOSQUE_NAME = "Masjid e Ameer e Muaviyyah"
 MOSQUE_NAME_ARABIC = "مسجد امیر معاویہ"
 CURRENCY_SYMBOL = "₹"
-CURRENCY_CODE = "PKR"
-CURRENCY_NAME = "Pakistani Rupee"
+CURRENCY_CODE = "INR"
+CURRENCY_NAME = "Indian Rupee"
 ```
 
 ## Project Structure
@@ -106,14 +106,15 @@ The application runs on port 5000 and is configured to work with the PostgreSQL 
 ## User Preferences
 - Islamic-themed design with emerald green and gold colors
 - Arabic calligraphy for mosque name
-- Pakistani Rupee (Rs.) currency
+- Indian Rupee (₹) currency
 - Mobile-first responsive design
 - No mock data - all transactions are real
 - Audit-grade data integrity
 
 ## Recent Changes
+- **December 2024**: Changed currency to Indian Rupee (₹)
+- **December 2024**: Removed verification process - income and expenses now auto-post to accounts on creation
 - **December 2024**: Updated mosque name to "Masjid e Ameer e Muaviyyah"
-- **December 2024**: Changed currency to Pakistani Rupee (Rs.)
 - **December 2024**: Implemented stunning Islamic-themed UI with geometric patterns
 - **December 2024**: Added Bismillah greeting on login page
 - **December 2024**: Enhanced dashboard with Islamic greeting (Assalamu Alaikum)

@@ -51,14 +51,14 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function formatCurrency(amount) {
-    return 'Rs. ' + new Intl.NumberFormat('en-PK', {
+    return '₹' + new Intl.NumberFormat('en-IN', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
     }).format(amount);
 }
 
 function formatCurrencyFull(amount) {
-    return 'Rs. ' + new Intl.NumberFormat('en-PK', {
+    return '₹' + new Intl.NumberFormat('en-IN', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
     }).format(amount);
@@ -66,7 +66,7 @@ function formatCurrencyFull(amount) {
 
 function formatDate(dateString) {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-PK', options);
+    return new Date(dateString).toLocaleDateString('en-IN', options);
 }
 
 function formatDateTime(dateString) {
@@ -77,7 +77,7 @@ function formatDateTime(dateString) {
         hour: '2-digit',
         minute: '2-digit'
     };
-    return new Date(dateString).toLocaleDateString('en-PK', options);
+    return new Date(dateString).toLocaleDateString('en-IN', options);
 }
 
 function initializeAnimations() {

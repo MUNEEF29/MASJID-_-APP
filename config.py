@@ -30,5 +30,5 @@ class Config:
     MOSQUE_NAME = "Masjid e Ameer e Muaviyyah"
     MOSQUE_NAME_ARABIC = "مسجد امیر معاویہ"
     CURRENCY_SYMBOL = "₹"
-    CURRENCY_CODE = "PKR"
-    CURRENCY_NAME = "Pakistani Rupee"
+    CURRENCY_CODE = "INR"
+    CURRENCY_NAME = "Indian Rupee"

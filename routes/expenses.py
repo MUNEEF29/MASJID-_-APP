@@ -151,8 +151,14 @@ def create():
                 amount=amount,
                 payment_mode=payment_mode,
                 payment_reference=payment_reference or None,
-                verification_status=VerificationStatus.PENDING,
-                approval_status=ApprovalStatus.PENDING,
+                verification_status=VerificationStatus.VERIFIED,
+                verified_by_id=current_user.id,
+                verified_at=datetime.utcnow(),
+                verification_remarks="Auto-verified on creation",
+                approval_status=ApprovalStatus.APPROVED,
+                approved_by_id=current_user.id,
+                approved_at=datetime.utcnow(),
+                approval_remarks="Auto-approved on creation",
                 entered_by_id=current_user.id
             )
             
@@ -165,6 +171,45 @@ def create():
                     expense.supporting_document = filename
             
             db.session.add(expense)
+            db.session.flush()
+            
+            expense_account, asset_account = get_expense_accounts(category, payment_mode, fund_type)
+            
+            transaction = Transaction(
+                reference_number=f"TXN-{voucher_number}",
+                transaction_type='expense',
+                date=date,
+                description=f"Expense: {payee} - {ExpenseCategory.CATEGORY_NAMES.get(category, category)}",
+                fund_type=fund_type,
+                total_amount=amount,
+                created_by_id=current_user.id
+            )
+            db.session.add(transaction)
+            db.session.flush()
+            
+            debit_entry = JournalEntry(
+                transaction_id=transaction.id,
+                account_id=expense_account.id,
+                debit_amount=amount,
+                credit_amount=Decimal('0'),
+                date=date,
+                description=f"Voucher: {voucher_number}"
+            )
+            
+            credit_entry = JournalEntry(
+                transaction_id=transaction.id,
+                account_id=asset_account.id,
+                debit_amount=Decimal('0'),
+                credit_amount=amount,
+                date=date,
+                description=f"Voucher: {voucher_number}"
+            )
+            
+            db.session.add(debit_entry)
+            db.session.add(credit_entry)
+            
+            expense.transaction_id = transaction.id
+            
             db.session.commit()
             
             log_action('create', 'expense', expense.id, None, {
@@ -173,7 +218,7 @@ def create():
                 'category': category
             })
             
-            flash(f'Expense entry created successfully. Voucher: {voucher_number}', 'success')
+            flash(f'Expense entry created and posted to accounts. Voucher: {voucher_number}', 'success')
             return redirect(url_for('expenses.view', id=expense.id))
             
         except Exception as e:
