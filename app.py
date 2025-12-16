@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from flask import Flask, redirect, url_for
 from flask_login import LoginManager
 from flask_migrate import Migrate
@@ -52,6 +53,10 @@ def create_app():
     app.register_blueprint(accounts_bp)
     app.register_blueprint(reports_bp)
     app.register_blueprint(admin_bp)
+    
+    @app.context_processor
+    def inject_now():
+        return {'now': datetime.utcnow}
     
     @app.route('/')
     def index():
