@@ -3,7 +3,7 @@ from functools import wraps
 import json
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
-from models import db, User, AuditLog, Role
+from models import db, User, AuditLog, create_default_accounts_for_user
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -23,30 +23,12 @@ def log_action(action, entity_type, entity_id=None, old_values=None, new_values=
         db.session.add(log)
         db.session.commit()
 
-def role_required(*roles):
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if not current_user.is_authenticated:
-                return redirect(url_for('auth.login'))
-            if current_user.role == Role.ADMIN:
-                return f(*args, **kwargs)
-            if current_user.role not in roles:
-                flash('You do not have permission to access this page.', 'danger')
-                return redirect(url_for('dashboard.index'))
-            return f(*args, **kwargs)
-        return decorated_function
-    return decorator
-
 def permission_required(permission):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if not current_user.is_authenticated:
                 return redirect(url_for('auth.login'))
-            if not current_user.has_permission(permission):
-                flash('You do not have permission to perform this action.', 'danger')
-                return redirect(url_for('dashboard.index'))
             return f(*args, **kwargs)
         return decorated_function
     return decorator
@@ -54,9 +36,6 @@ def permission_required(permission):
 def read_only_check(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if current_user.is_authenticated and current_user.is_read_only():
-            flash('Your account has read-only access.', 'warning')
-            return redirect(url_for('dashboard.index'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -66,19 +45,19 @@ def login():
         return redirect(url_for('dashboard.index'))
     
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
         remember = request.form.get('remember', False)
         
-        if not username or not password:
-            flash('Please enter both username and password.', 'danger')
+        if not email or not password:
+            flash('Please enter both email and password.', 'danger')
             return render_template('auth/login.html')
         
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter_by(email=email).first()
         
         if user and user.check_password(password):
             if not user.is_active:
-                flash('Your account has been deactivated. Please contact administrator.', 'danger')
+                flash('Your account has been deactivated.', 'danger')
                 return render_template('auth/login.html')
             
             login_user(user, remember=remember)
@@ -92,9 +71,65 @@ def login():
                 return redirect(next_page)
             return redirect(url_for('dashboard.index'))
         else:
-            flash('Invalid username or password.', 'danger')
+            flash('Invalid email or password.', 'danger')
     
     return render_template('auth/login.html')
+
+@auth_bp.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard.index'))
+    
+    if request.method == 'POST':
+        full_name = request.form.get('full_name', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        
+        if not all([full_name, email, password, confirm_password]):
+            flash('Please fill in all required fields.', 'danger')
+            return render_template('auth/register.html')
+        
+        if password != confirm_password:
+            flash('Passwords do not match.', 'danger')
+            return render_template('auth/register.html')
+        
+        if len(password) < 8:
+            flash('Password must be at least 8 characters long.', 'danger')
+            return render_template('auth/register.html')
+        
+        if User.query.filter_by(email=email).first():
+            flash('An account with this email already exists.', 'danger')
+            return render_template('auth/register.html')
+        
+        username = email.split('@')[0]
+        base_username = username
+        counter = 1
+        while User.query.filter_by(username=username).first():
+            username = f"{base_username}{counter}"
+            counter += 1
+        
+        user = User(
+            username=username,
+            email=email,
+            full_name=full_name,
+            is_active=True
+        )
+        user.set_password(password)
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        create_default_accounts_for_user(user.id)
+        
+        login_user(user, remember=True)
+        user.last_login = datetime.utcnow()
+        db.session.commit()
+        
+        flash(f'Welcome {full_name}! Your account has been created successfully.', 'success')
+        return redirect(url_for('dashboard.index'))
+    
+    return render_template('auth/register.html')
 
 @auth_bp.route('/logout')
 @login_required
@@ -112,7 +147,7 @@ def profile():
         
         if action == 'update_profile':
             full_name = request.form.get('full_name', '').strip()
-            email = request.form.get('email', '').strip()
+            email = request.form.get('email', '').strip().lower()
             
             if not full_name or not email:
                 flash('Full name and email are required.', 'danger')
@@ -137,22 +172,37 @@ def profile():
             new_password = request.form.get('new_password', '')
             confirm_password = request.form.get('confirm_password', '')
             
-            if not current_user.check_password(current_password):
-                flash('Current password is incorrect.', 'danger')
-                return render_template('auth/profile.html')
-            
-            if len(new_password) < 8:
-                flash('New password must be at least 8 characters long.', 'danger')
-                return render_template('auth/profile.html')
-            
-            if new_password != confirm_password:
-                flash('New passwords do not match.', 'danger')
-                return render_template('auth/profile.html')
-            
-            current_user.set_password(new_password)
-            db.session.commit()
-            
-            log_action('change_password', 'user', current_user.id)
-            flash('Password changed successfully.', 'success')
+            if current_user.google_id and not current_user.password_hash:
+                if len(new_password) < 8:
+                    flash('New password must be at least 8 characters long.', 'danger')
+                    return render_template('auth/profile.html')
+                
+                if new_password != confirm_password:
+                    flash('New passwords do not match.', 'danger')
+                    return render_template('auth/profile.html')
+                
+                current_user.set_password(new_password)
+                db.session.commit()
+                
+                log_action('set_password', 'user', current_user.id)
+                flash('Password has been set successfully. You can now login with email/password.', 'success')
+            else:
+                if not current_user.check_password(current_password):
+                    flash('Current password is incorrect.', 'danger')
+                    return render_template('auth/profile.html')
+                
+                if len(new_password) < 8:
+                    flash('New password must be at least 8 characters long.', 'danger')
+                    return render_template('auth/profile.html')
+                
+                if new_password != confirm_password:
+                    flash('New passwords do not match.', 'danger')
+                    return render_template('auth/profile.html')
+                
+                current_user.set_password(new_password)
+                db.session.commit()
+                
+                log_action('change_password', 'user', current_user.id)
+                flash('Password changed successfully.', 'success')
     
     return render_template('auth/profile.html')

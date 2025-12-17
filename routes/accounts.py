@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
-from models import (db, Account, JournalEntry, AccountType, FundType, Role)
+from models import (db, Account, JournalEntry, AccountType, FundType)
 from routes.auth import permission_required, read_only_check, log_action
 
 accounts_bp = Blueprint('accounts', __name__, url_prefix='/accounts')
@@ -10,7 +10,7 @@ accounts_bp = Blueprint('accounts', __name__, url_prefix='/accounts')
 @accounts_bp.route('/')
 @login_required
 def index():
-    accounts = Account.query.filter_by(is_active=True).order_by(Account.code).all()
+    accounts = Account.query.filter_by(user_id=current_user.id, is_active=True).order_by(Account.code).all()
     
     grouped_accounts = {}
     for acc_type in AccountType.ALL_TYPES:
@@ -25,7 +25,7 @@ def index():
 @accounts_bp.route('/<int:id>/ledger')
 @login_required
 def ledger(id):
-    account = Account.query.get_or_404(id)
+    account = Account.query.filter_by(id=id, user_id=current_user.id).first_or_404()
     
     page = request.args.get('page', 1, type=int)
     start_date = request.args.get('start_date', '')
@@ -91,7 +91,7 @@ def trial_balance():
         except ValueError:
             pass
     
-    accounts = Account.query.filter_by(is_active=True).order_by(Account.code).all()
+    accounts = Account.query.filter_by(user_id=current_user.id, is_active=True).order_by(Account.code).all()
     
     trial_data = []
     total_debit = Decimal('0')
@@ -156,10 +156,12 @@ def income_expenditure():
             pass
     
     income_accounts = Account.query.filter_by(
+        user_id=current_user.id,
         account_type=AccountType.INCOME,
         is_active=True
     )
     expense_accounts = Account.query.filter_by(
+        user_id=current_user.id,
         account_type=AccountType.EXPENSE,
         is_active=True
     )
@@ -212,16 +214,19 @@ def balance_sheet():
             pass
     
     asset_accounts = Account.query.filter_by(
+        user_id=current_user.id,
         account_type=AccountType.ASSET,
         is_active=True
     ).order_by(Account.code).all()
     
     liability_accounts = Account.query.filter_by(
+        user_id=current_user.id,
         account_type=AccountType.LIABILITY,
         is_active=True
     ).order_by(Account.code).all()
     
     equity_accounts = Account.query.filter_by(
+        user_id=current_user.id,
         account_type=AccountType.EQUITY,
         is_active=True
     ).order_by(Account.code).all()
@@ -247,8 +252,8 @@ def balance_sheet():
         equity_data.append({'account': account, 'balance': balance})
         total_equity += balance
     
-    income_accounts = Account.query.filter_by(account_type=AccountType.INCOME, is_active=True).all()
-    expense_accounts = Account.query.filter_by(account_type=AccountType.EXPENSE, is_active=True).all()
+    income_accounts = Account.query.filter_by(user_id=current_user.id, account_type=AccountType.INCOME, is_active=True).all()
+    expense_accounts = Account.query.filter_by(user_id=current_user.id, account_type=AccountType.EXPENSE, is_active=True).all()
     
     total_income = sum(acc.get_balance(end_date=end_date) for acc in income_accounts)
     total_expense = sum(acc.get_balance(end_date=end_date) for acc in expense_accounts)

@@ -3,7 +3,7 @@ import csv
 from datetime import datetime
 from decimal import Decimal
 from flask import Blueprint, render_template, request, make_response, send_file
-from flask_login import login_required
+from flask_login import login_required, current_user
 from sqlalchemy import func
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -31,11 +31,13 @@ def daily():
         report_date = datetime.utcnow().date()
     
     incomes = Income.query.filter(
+        Income.user_id == current_user.id,
         Income.date == report_date,
         Income.is_reversed == False
     ).order_by(Income.created_at).all()
     
     expenses = Expense.query.filter(
+        Expense.user_id == current_user.id,
         Expense.date == report_date,
         Expense.is_reversed == False
     ).order_by(Expense.created_at).all()
@@ -68,6 +70,7 @@ def monthly():
         Income.category,
         func.sum(Income.amount).label('total')
     ).filter(
+        Income.user_id == current_user.id,
         Income.date >= start_date,
         Income.date < end_date,
         Income.is_reversed == False,
@@ -78,6 +81,7 @@ def monthly():
         Expense.category,
         func.sum(Expense.amount).label('total')
     ).filter(
+        Expense.user_id == current_user.id,
         Expense.date >= start_date,
         Expense.date < end_date,
         Expense.is_reversed == False,
@@ -99,17 +103,18 @@ def monthly():
         expense_category_names=ExpenseCategory.CATEGORY_NAMES
     )
 
-@reports_bp.route('/donor')
+@reports_bp.route('/payer')
 @login_required
-def donor():
+def payer():
     start_date = request.args.get('start_date', '')
     end_date = request.args.get('end_date', '')
     
     query = Income.query.filter(
+        Income.user_id == current_user.id,
         Income.is_reversed == False,
         Income.verification_status == VerificationStatus.VERIFIED,
-        Income.donor_name.isnot(None),
-        Income.donor_name != ''
+        Income.payer_name.isnot(None),
+        Income.payer_name != ''
     )
     
     if start_date:
@@ -126,35 +131,36 @@ def donor():
         except ValueError:
             pass
     
-    donor_totals = db.session.query(
-        Income.donor_name,
+    payer_totals = db.session.query(
+        Income.payer_name,
         func.count(Income.id).label('count'),
         func.sum(Income.amount).label('total')
     ).filter(
+        Income.user_id == current_user.id,
         Income.is_reversed == False,
         Income.verification_status == VerificationStatus.VERIFIED,
-        Income.donor_name.isnot(None),
-        Income.donor_name != ''
+        Income.payer_name.isnot(None),
+        Income.payer_name != ''
     )
     
     if start_date:
         try:
             start = datetime.strptime(start_date, '%Y-%m-%d').date()
-            donor_totals = donor_totals.filter(Income.date >= start)
+            payer_totals = payer_totals.filter(Income.date >= start)
         except ValueError:
             pass
     
     if end_date:
         try:
             end = datetime.strptime(end_date, '%Y-%m-%d').date()
-            donor_totals = donor_totals.filter(Income.date <= end)
+            payer_totals = payer_totals.filter(Income.date <= end)
         except ValueError:
             pass
     
-    donor_totals = donor_totals.group_by(Income.donor_name).order_by(func.sum(Income.amount).desc()).all()
+    payer_totals = payer_totals.group_by(Income.payer_name).order_by(func.sum(Income.amount).desc()).all()
     
-    return render_template('reports/donor.html',
-        donor_totals=donor_totals,
+    return render_template('reports/payer.html',
+        payer_totals=payer_totals,
         start_date=start_date,
         end_date=end_date
     )
@@ -166,18 +172,21 @@ def fund_summary():
     
     for fund_type in FundType.ALL_FUNDS:
         income_accounts = Account.query.filter_by(
+            user_id=current_user.id,
             account_type=AccountType.INCOME,
             fund_type=fund_type,
             is_active=True
         ).all()
         
         expense_accounts = Account.query.filter_by(
+            user_id=current_user.id,
             account_type=AccountType.EXPENSE,
             fund_type=fund_type,
             is_active=True
         ).all()
         
         asset_accounts = Account.query.filter_by(
+            user_id=current_user.id,
             account_type=AccountType.ASSET,
             fund_type=fund_type,
             is_active=True
@@ -203,7 +212,7 @@ def export_income_csv():
     start_date = request.args.get('start_date', '')
     end_date = request.args.get('end_date', '')
     
-    query = Income.query.filter_by(is_reversed=False)
+    query = Income.query.filter_by(user_id=current_user.id, is_reversed=False)
     
     if start_date:
         try:
@@ -226,8 +235,7 @@ def export_income_csv():
     
     writer.writerow([
         'Receipt Number', 'Date', 'Time', 'Category', 'Fund Type',
-        'Source', 'Donor Name', 'Payment Mode', 'Amount',
-        'Verification Status', 'Entered By'
+        'Source', 'Payer Name', 'Payment Mode', 'Amount', 'Description'
     ])
     
     for income in incomes:
@@ -238,11 +246,10 @@ def export_income_csv():
             IncomeCategory.CATEGORY_NAMES.get(income.category, income.category),
             FundType.FUND_NAMES.get(income.fund_type, income.fund_type),
             income.source,
-            income.donor_name or '',
+            income.payer_name or '',
             income.payment_mode,
             float(income.amount),
-            income.verification_status,
-            income.entered_by.full_name
+            income.description or ''
         ])
     
     output.seek(0)
@@ -259,7 +266,7 @@ def export_expense_csv():
     start_date = request.args.get('start_date', '')
     end_date = request.args.get('end_date', '')
     
-    query = Expense.query.filter_by(is_reversed=False)
+    query = Expense.query.filter_by(user_id=current_user.id, is_reversed=False)
     
     if start_date:
         try:
@@ -282,8 +289,7 @@ def export_expense_csv():
     
     writer.writerow([
         'Voucher Number', 'Date', 'Category', 'Fund Type',
-        'Payee', 'Description', 'Payment Mode', 'Amount',
-        'Verification Status', 'Approval Status', 'Entered By'
+        'Payee', 'Description', 'Payment Mode', 'Amount'
     ])
     
     for expense in expenses:
@@ -295,10 +301,7 @@ def export_expense_csv():
             expense.payee,
             expense.description,
             expense.payment_mode,
-            float(expense.amount),
-            expense.verification_status,
-            expense.approval_status,
-            expense.entered_by.full_name
+            float(expense.amount)
         ])
     
     output.seek(0)
@@ -321,7 +324,7 @@ def export_trial_balance_pdf():
         except ValueError:
             pass
     
-    accounts = Account.query.filter_by(is_active=True).order_by(Account.code).all()
+    accounts = Account.query.filter_by(user_id=current_user.id, is_active=True).order_by(Account.code).all()
     
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30)
@@ -337,7 +340,7 @@ def export_trial_balance_pdf():
         alignment=1
     )
     
-    elements.append(Paragraph("Masjid Accounting System", title_style))
+    elements.append(Paragraph("Personal Finance Manager", title_style))
     elements.append(Paragraph("Trial Balance", styles['Heading2']))
     
     if end_date:

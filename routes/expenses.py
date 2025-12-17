@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from models import (db, Expense, Transaction, JournalEntry, Account, AuditLog,
                    ExpenseCategory, PaymentMode, FundType, VerificationStatus,
-                   ApprovalStatus, PeriodLock, Role)
+                   ApprovalStatus, PeriodLock)
 from routes.auth import permission_required, read_only_check, log_action
 
 expenses_bp = Blueprint('expenses', __name__, url_prefix='/expenses')
@@ -15,27 +15,33 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
 
-def get_expense_accounts(category, payment_mode, fund_type):
+def get_expense_accounts(user_id, category, payment_mode, fund_type):
     category_to_account = {
-        ExpenseCategory.SALARY: '5000',
-        ExpenseCategory.UTILITIES: '5010',
-        ExpenseCategory.MAINTENANCE: '5020',
-        ExpenseCategory.VENDOR: '5030',
-        ExpenseCategory.CHARITY: '5041' if fund_type == FundType.ZAKAT else '5040',
-        ExpenseCategory.ASSET: '5050',
-        ExpenseCategory.OTHER: '5060',
+        ExpenseCategory.FOOD: '5000',
+        ExpenseCategory.TRANSPORT: '5010',
+        ExpenseCategory.UTILITIES: '5020',
+        ExpenseCategory.RENT: '5030',
+        ExpenseCategory.SHOPPING: '5040',
+        ExpenseCategory.ENTERTAINMENT: '5050',
+        ExpenseCategory.HEALTHCARE: '5060',
+        ExpenseCategory.EDUCATION: '5070',
+        ExpenseCategory.INVESTMENT: '5080',
+        ExpenseCategory.OTHER: '5090',
     }
-    expense_account = Account.query.filter_by(code=category_to_account.get(category, '5060')).first()
+    expense_account = Account.query.filter_by(
+        user_id=user_id,
+        code=category_to_account.get(category, '5090')
+    ).first()
     
     if payment_mode == PaymentMode.CASH:
-        asset_account = Account.query.filter_by(code='1000').first()
+        asset_account = Account.query.filter_by(user_id=user_id, code='1000').first()
     else:
-        if fund_type == FundType.ZAKAT:
-            asset_account = Account.query.filter_by(code='1020').first()
-        elif fund_type == FundType.AMANAH:
-            asset_account = Account.query.filter_by(code='1030').first()
+        if fund_type == FundType.SAVINGS:
+            asset_account = Account.query.filter_by(user_id=user_id, code='1020').first()
+        elif fund_type == FundType.EMERGENCY:
+            asset_account = Account.query.filter_by(user_id=user_id, code='1030').first()
         else:
-            asset_account = Account.query.filter_by(code='1010').first()
+            asset_account = Account.query.filter_by(user_id=user_id, code='1010').first()
     
     return expense_account, asset_account
 
@@ -48,7 +54,7 @@ def index():
     category_filter = request.args.get('category', '')
     fund_filter = request.args.get('fund', '')
     
-    query = Expense.query.filter_by(is_reversed=False)
+    query = Expense.query.filter_by(user_id=current_user.id, is_reversed=False)
     
     if status_filter:
         query = query.filter_by(verification_status=status_filter)
@@ -117,7 +123,7 @@ def create():
                     payment_mode_names=PaymentMode.MODE_NAMES
                 )
             
-            if PeriodLock.is_period_locked(date):
+            if PeriodLock.is_period_locked(current_user.id, date):
                 flash('Cannot create entry for a locked period.', 'danger')
                 return redirect(url_for('expenses.index'))
             
@@ -136,12 +142,10 @@ def create():
                     payment_mode_names=PaymentMode.MODE_NAMES
                 )
             
-            if category == ExpenseCategory.CHARITY and fund_type == FundType.ZAKAT:
-                pass
-            
-            voucher_number = Expense.generate_voucher_number()
+            voucher_number = Expense.generate_voucher_number(current_user.id)
             
             expense = Expense(
+                user_id=current_user.id,
                 voucher_number=voucher_number,
                 date=date,
                 category=category,
@@ -173,42 +177,44 @@ def create():
             db.session.add(expense)
             db.session.flush()
             
-            expense_account, asset_account = get_expense_accounts(category, payment_mode, fund_type)
+            expense_account, asset_account = get_expense_accounts(current_user.id, category, payment_mode, fund_type)
             
-            transaction = Transaction(
-                reference_number=f"TXN-{voucher_number}",
-                transaction_type='expense',
-                date=date,
-                description=f"Expense: {payee} - {ExpenseCategory.CATEGORY_NAMES.get(category, category)}",
-                fund_type=fund_type,
-                total_amount=amount,
-                created_by_id=current_user.id
-            )
-            db.session.add(transaction)
-            db.session.flush()
-            
-            debit_entry = JournalEntry(
-                transaction_id=transaction.id,
-                account_id=expense_account.id,
-                debit_amount=amount,
-                credit_amount=Decimal('0'),
-                date=date,
-                description=f"Voucher: {voucher_number}"
-            )
-            
-            credit_entry = JournalEntry(
-                transaction_id=transaction.id,
-                account_id=asset_account.id,
-                debit_amount=Decimal('0'),
-                credit_amount=amount,
-                date=date,
-                description=f"Voucher: {voucher_number}"
-            )
-            
-            db.session.add(debit_entry)
-            db.session.add(credit_entry)
-            
-            expense.transaction_id = transaction.id
+            if expense_account and asset_account:
+                transaction = Transaction(
+                    user_id=current_user.id,
+                    reference_number=f"TXN-{voucher_number}",
+                    transaction_type='expense',
+                    date=date,
+                    description=f"Expense: {payee} - {ExpenseCategory.CATEGORY_NAMES.get(category, category)}",
+                    fund_type=fund_type,
+                    total_amount=amount,
+                    created_by_id=current_user.id
+                )
+                db.session.add(transaction)
+                db.session.flush()
+                
+                debit_entry = JournalEntry(
+                    transaction_id=transaction.id,
+                    account_id=expense_account.id,
+                    debit_amount=amount,
+                    credit_amount=Decimal('0'),
+                    date=date,
+                    description=f"Voucher: {voucher_number}"
+                )
+                
+                credit_entry = JournalEntry(
+                    transaction_id=transaction.id,
+                    account_id=asset_account.id,
+                    debit_amount=Decimal('0'),
+                    credit_amount=amount,
+                    date=date,
+                    description=f"Voucher: {voucher_number}"
+                )
+                
+                db.session.add(debit_entry)
+                db.session.add(credit_entry)
+                
+                expense.transaction_id = transaction.id
             
             db.session.commit()
             
@@ -218,7 +224,7 @@ def create():
                 'category': category
             })
             
-            flash(f'Expense entry created and posted to accounts. Voucher: {voucher_number}', 'success')
+            flash(f'Expense entry created successfully. Voucher: {voucher_number}', 'success')
             return redirect(url_for('expenses.view', id=expense.id))
             
         except Exception as e:
@@ -237,7 +243,7 @@ def create():
 @expenses_bp.route('/<int:id>')
 @login_required
 def view(id):
-    expense = Expense.query.get_or_404(id)
+    expense = Expense.query.filter_by(id=id, user_id=current_user.id).first_or_404()
     return render_template('expenses/view.html',
         expense=expense,
         category_names=ExpenseCategory.CATEGORY_NAMES,
@@ -250,154 +256,18 @@ def view(id):
 def download_file(filename):
     return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
 
-@expenses_bp.route('/<int:id>/verify', methods=['POST'])
-@login_required
-@read_only_check
-@permission_required('verify_expense')
-def verify(id):
-    expense = Expense.query.get_or_404(id)
-    
-    if expense.verification_status != VerificationStatus.PENDING:
-        flash('This expense entry has already been processed.', 'warning')
-        return redirect(url_for('expenses.view', id=id))
-    
-    if expense.entered_by_id == current_user.id and current_user.role != Role.ADMIN:
-        flash('You cannot verify your own entry.', 'danger')
-        return redirect(url_for('expenses.view', id=id))
-    
-    action = request.form.get('action')
-    remarks = request.form.get('remarks', '').strip()
-    
-    if not remarks:
-        flash('Verification remarks are required.', 'danger')
-        return redirect(url_for('expenses.view', id=id))
-    
-    old_status = expense.verification_status
-    
-    if action == 'verify':
-        expense.verification_status = VerificationStatus.VERIFIED
-        expense.verified_by_id = current_user.id
-        expense.verified_at = datetime.utcnow()
-        expense.verification_remarks = remarks
-        flash('Expense entry verified. Pending approval.', 'success')
-        
-    elif action == 'reject':
-        expense.verification_status = VerificationStatus.REJECTED
-        expense.verified_by_id = current_user.id
-        expense.verified_at = datetime.utcnow()
-        expense.verification_remarks = remarks
-        flash('Expense entry rejected.', 'warning')
-    
-    db.session.commit()
-    
-    log_action('verify', 'expense', expense.id,
-              {'status': old_status},
-              {'status': expense.verification_status, 'remarks': remarks})
-    
-    return redirect(url_for('expenses.view', id=id))
-
-@expenses_bp.route('/<int:id>/approve', methods=['POST'])
-@login_required
-@read_only_check
-@permission_required('approve_expense')
-def approve(id):
-    expense = Expense.query.get_or_404(id)
-    
-    if expense.verification_status != VerificationStatus.VERIFIED:
-        flash('This expense must be verified before approval.', 'warning')
-        return redirect(url_for('expenses.view', id=id))
-    
-    if expense.approval_status != ApprovalStatus.PENDING:
-        flash('This expense entry has already been processed.', 'warning')
-        return redirect(url_for('expenses.view', id=id))
-    
-    if expense.entered_by_id == current_user.id and current_user.role != Role.ADMIN:
-        flash('You cannot approve your own entry.', 'danger')
-        return redirect(url_for('expenses.view', id=id))
-    
-    action = request.form.get('action')
-    remarks = request.form.get('remarks', '').strip()
-    
-    if not remarks:
-        flash('Approval remarks are required.', 'danger')
-        return redirect(url_for('expenses.view', id=id))
-    
-    old_status = expense.approval_status
-    
-    if action == 'approve':
-        expense.approval_status = ApprovalStatus.APPROVED
-        expense.approved_by_id = current_user.id
-        expense.approved_at = datetime.utcnow()
-        expense.approval_remarks = remarks
-        
-        expense_account, asset_account = get_expense_accounts(
-            expense.category, expense.payment_mode, expense.fund_type
-        )
-        
-        transaction = Transaction(
-            reference_number=f"TXN-{expense.voucher_number}",
-            transaction_type='expense',
-            date=expense.date,
-            description=f"Expense: {expense.payee} - {ExpenseCategory.CATEGORY_NAMES.get(expense.category, expense.category)}",
-            fund_type=expense.fund_type,
-            total_amount=expense.amount,
-            created_by_id=current_user.id
-        )
-        db.session.add(transaction)
-        db.session.flush()
-        
-        debit_entry = JournalEntry(
-            transaction_id=transaction.id,
-            account_id=expense_account.id,
-            debit_amount=expense.amount,
-            credit_amount=Decimal('0'),
-            date=expense.date,
-            description=f"Voucher: {expense.voucher_number}"
-        )
-        
-        credit_entry = JournalEntry(
-            transaction_id=transaction.id,
-            account_id=asset_account.id,
-            debit_amount=Decimal('0'),
-            credit_amount=expense.amount,
-            date=expense.date,
-            description=f"Voucher: {expense.voucher_number}"
-        )
-        
-        db.session.add(debit_entry)
-        db.session.add(credit_entry)
-        
-        expense.transaction_id = transaction.id
-        
-        flash('Expense approved and posted to accounts.', 'success')
-        
-    elif action == 'reject':
-        expense.approval_status = ApprovalStatus.REJECTED
-        expense.approved_by_id = current_user.id
-        expense.approved_at = datetime.utcnow()
-        expense.approval_remarks = remarks
-        flash('Expense entry rejected.', 'warning')
-    
-    db.session.commit()
-    
-    log_action('approve', 'expense', expense.id,
-              {'status': old_status},
-              {'status': expense.approval_status, 'remarks': remarks})
-    
-    return redirect(url_for('expenses.view', id=id))
-
 @expenses_bp.route('/<int:id>/reverse', methods=['POST'])
 @login_required
 @read_only_check
 @permission_required('create_expense')
 def reverse(id):
-    expense = Expense.query.get_or_404(id)
+    expense = Expense.query.filter_by(id=id, user_id=current_user.id).first_or_404()
     
     if expense.is_reversed:
         flash('This expense entry has already been reversed.', 'warning')
         return redirect(url_for('expenses.view', id=id))
     
-    if PeriodLock.is_period_locked(expense.date):
+    if PeriodLock.is_period_locked(current_user.id, expense.date):
         flash('Cannot reverse entry in a locked period.', 'danger')
         return redirect(url_for('expenses.view', id=id))
     
@@ -407,6 +277,7 @@ def reverse(id):
         return redirect(url_for('expenses.view', id=id))
     
     reversal = Expense(
+        user_id=current_user.id,
         voucher_number=f"REV-{expense.voucher_number}",
         date=datetime.utcnow().date(),
         category=expense.category,
@@ -431,45 +302,47 @@ def reverse(id):
     
     if expense.transaction_id:
         expense_account, asset_account = get_expense_accounts(
-            expense.category, expense.payment_mode, expense.fund_type
+            current_user.id, expense.category, expense.payment_mode, expense.fund_type
         )
         
-        rev_transaction = Transaction(
-            reference_number=f"TXN-REV-{expense.voucher_number}",
-            transaction_type='expense_reversal',
-            date=datetime.utcnow().date(),
-            description=f"Reversal of Expense: {expense.voucher_number}",
-            fund_type=expense.fund_type,
-            total_amount=expense.amount,
-            created_by_id=current_user.id,
-            reversal_of_id=expense.transaction_id
-        )
-        db.session.add(rev_transaction)
-        db.session.flush()
-        
-        debit_entry = JournalEntry(
-            transaction_id=rev_transaction.id,
-            account_id=asset_account.id,
-            debit_amount=expense.amount,
-            credit_amount=Decimal('0'),
-            date=datetime.utcnow().date(),
-            description=f"Reversal of Voucher: {expense.voucher_number}"
-        )
-        
-        credit_entry = JournalEntry(
-            transaction_id=rev_transaction.id,
-            account_id=expense_account.id,
-            debit_amount=Decimal('0'),
-            credit_amount=expense.amount,
-            date=datetime.utcnow().date(),
-            description=f"Reversal of Voucher: {expense.voucher_number}"
-        )
-        
-        db.session.add(debit_entry)
-        db.session.add(credit_entry)
-        reversal.transaction_id = rev_transaction.id
-        
-        expense.transaction.is_reversed = True
+        if expense_account and asset_account:
+            rev_transaction = Transaction(
+                user_id=current_user.id,
+                reference_number=f"TXN-REV-{expense.voucher_number}",
+                transaction_type='expense_reversal',
+                date=datetime.utcnow().date(),
+                description=f"Reversal of Expense: {expense.voucher_number}",
+                fund_type=expense.fund_type,
+                total_amount=expense.amount,
+                created_by_id=current_user.id,
+                reversal_of_id=expense.transaction_id
+            )
+            db.session.add(rev_transaction)
+            db.session.flush()
+            
+            debit_entry = JournalEntry(
+                transaction_id=rev_transaction.id,
+                account_id=asset_account.id,
+                debit_amount=expense.amount,
+                credit_amount=Decimal('0'),
+                date=datetime.utcnow().date(),
+                description=f"Reversal of Voucher: {expense.voucher_number}"
+            )
+            
+            credit_entry = JournalEntry(
+                transaction_id=rev_transaction.id,
+                account_id=expense_account.id,
+                debit_amount=Decimal('0'),
+                credit_amount=expense.amount,
+                date=datetime.utcnow().date(),
+                description=f"Reversal of Voucher: {expense.voucher_number}"
+            )
+            
+            db.session.add(debit_entry)
+            db.session.add(credit_entry)
+            reversal.transaction_id = rev_transaction.id
+            
+            expense.transaction.is_reversed = True
     
     db.session.add(reversal)
     db.session.commit()

@@ -27,8 +27,11 @@ class Config:
     
     FISCAL_YEAR_START_MONTH = 1
     
-    MOSQUE_NAME = "Masjid e Ameer e Muaviyyah"
-    MOSQUE_NAME_ARABIC = "مسجد امیر معاویہ"
-    CURRENCY_SYMBOL = "₹"
-    CURRENCY_CODE = "INR"
-    CURRENCY_NAME = "Indian Rupee"
+    APP_NAME = "Personal Finance Manager"
+    APP_TAGLINE = "Your Personal Accounting Solution"
+    CURRENCY_SYMBOL = "$"
+    CURRENCY_CODE = "USD"
+    CURRENCY_NAME = "US Dollar"
+    
+    GOOGLE_OAUTH_CLIENT_ID = os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
+    GOOGLE_OAUTH_CLIENT_SECRET = os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET')
