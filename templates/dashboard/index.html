@@ -3,22 +3,16 @@
 {% block title %}Dashboard - {{ config.MOSQUE_NAME }}{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
+<div class="row mb-3">
     <div class="col-12">
-        <div class="text-center mb-4">
-            <p class="islamic-greeting-arabic mb-1">السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللهِ وَبَرَكَاتُهُ</p>
-            <p class="islamic-greeting">Peace be upon you and Allah's mercy and blessings</p>
+        <div class="text-center mb-2">
+            <p class="islamic-greeting-arabic mb-0" style="font-size: 1.5rem;">السَّلَامُ عَلَيْكُمْ</p>
+            <p class="islamic-greeting mb-0" style="font-size: 1rem;">Peace be upon you</p>
         </div>
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <h2 class="page-title mb-1"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
-                <p class="text-muted mb-0">Welcome back, <strong>{{ current_user.full_name }}</strong></p>
-            </div>
-            <div class="d-flex align-items-center gap-3">
-                <span class="badge bg-light text-dark px-3 py-2">
-                    <i class="bi bi-calendar3 me-1"></i>
-                    {{ now().strftime('%A, %d %B %Y') if now is defined else '' }}
-                </span>
+                <h2 class="page-title mb-0" style="font-size: 1.3rem;"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
+                <p class="text-muted mb-0" style="font-size: 0.85rem;">Welcome, <strong>{{ current_user.full_name }}</strong></p>
             </div>
         </div>
     </div>
@@ -37,14 +31,14 @@
 </div>
 {% endif %}
 
-<div class="row g-4 mb-4">
+<div class="row g-2 mb-3">
     <div class="col-6 col-lg-3">
         <div class="card stat-card emerald h-100">
-            <div class="card-body py-4">
+            <div class="card-body compact-stat">
                 <div class="d-flex flex-column">
-                    <h6 class="card-subtitle mb-2 opacity-75">Cash Balance</h6>
+                    <h6 class="card-subtitle opacity-75">Cash Balance</h6>
                     <h3 class="card-title mb-0 fw-bold">
-                        <span class="currency-symbol">{{ config.CURRENCY_SYMBOL }}</span> {{ "{:,.0f}".format(cash_balance) }}
+                        <span class="currency-symbol">{{ config.CURRENCY_SYMBOL }}</span>{{ "{:,.0f}".format(cash_balance) }}
                     </h3>
                 </div>
                 <i class="bi bi-cash-coin icon-bg"></i>
@@ -53,11 +47,11 @@
     </div>
     <div class="col-6 col-lg-3">
         <div class="card stat-card blue h-100">
-            <div class="card-body py-4">
+            <div class="card-body compact-stat">
                 <div class="d-flex flex-column">
-                    <h6 class="card-subtitle mb-2 opacity-75">Bank Balance</h6>
+                    <h6 class="card-subtitle opacity-75">Bank Balance</h6>
                     <h3 class="card-title mb-0 fw-bold">
-                        <span class="currency-symbol">{{ config.CURRENCY_SYMBOL }}</span> {{ "{:,.0f}".format(bank_balance) }}
+                        <span class="currency-symbol">{{ config.CURRENCY_SYMBOL }}</span>{{ "{:,.0f}".format(bank_balance) }}
                     </h3>
                 </div>
                 <i class="bi bi-bank icon-bg"></i>
@@ -66,11 +60,11 @@
     </div>
     <div class="col-6 col-lg-3">
         <div class="card stat-card gold h-100">
-            <div class="card-body py-4">
+            <div class="card-body compact-stat">
                 <div class="d-flex flex-column">
-                    <h6 class="card-subtitle mb-2 opacity-75">Monthly Income</h6>
+                    <h6 class="card-subtitle opacity-75">Monthly Income</h6>
                     <h3 class="card-title mb-0 fw-bold">
-                        <span class="currency-symbol">{{ config.CURRENCY_SYMBOL }}</span> {{ "{:,.0f}".format(monthly_income) }}
+                        <span class="currency-symbol">{{ config.CURRENCY_SYMBOL }}</span>{{ "{:,.0f}".format(monthly_income) }}
                     </h3>
                 </div>
                 <i class="bi bi-arrow-up-circle icon-bg"></i>
@@ -79,11 +73,11 @@
     </div>
     <div class="col-6 col-lg-3">
         <div class="card stat-card red h-100">
-            <div class="card-body py-4">
+            <div class="card-body compact-stat">
                 <div class="d-flex flex-column">
-                    <h6 class="card-subtitle mb-2 opacity-75">Monthly Expense</h6>
+                    <h6 class="card-subtitle opacity-75">Monthly Expense</h6>
                     <h3 class="card-title mb-0 fw-bold">
-                        <span class="currency-symbol">{{ config.CURRENCY_SYMBOL }}</span> {{ "{:,.0f}".format(monthly_expense) }}
+                        <span class="currency-symbol">{{ config.CURRENCY_SYMBOL }}</span>{{ "{:,.0f}".format(monthly_expense) }}
                     </h3>
                 </div>
                 <i class="bi bi-arrow-down-circle icon-bg"></i>
@@ -93,33 +87,45 @@
 </div>
 
 {% if not current_user.is_read_only() %}
-<div class="row g-4 mb-4">
+<div class="row g-2 mb-3">
     <div class="col-12">
         <div class="card">
-            <div class="card-body py-3">
-                <div class="row g-3">
-                    <div class="col-6 col-md-3">
-                        <a href="{{ url_for('income.create') }}" class="quick-action-btn w-100 h-100">
+            <div class="card-body py-2">
+                <div class="row g-2">
+                    <div class="col-3 col-md-2">
+                        <a href="{{ url_for('income.create') }}" class="quick-action-btn w-100 h-100" id="shortcut-i" title="Press 'I' for quick access">
                             <i class="bi bi-plus-circle text-success"></i>
-                            <span class="mt-2 fw-medium">New Income</span>
+                            <span class="fw-medium">Income</span>
                         </a>
                     </div>
-                    <div class="col-6 col-md-3">
-                        <a href="{{ url_for('expenses.create') }}" class="quick-action-btn w-100 h-100">
+                    <div class="col-3 col-md-2">
+                        <a href="{{ url_for('expenses.create') }}" class="quick-action-btn w-100 h-100" id="shortcut-e" title="Press 'E' for quick access">
                             <i class="bi bi-dash-circle text-danger"></i>
-                            <span class="mt-2 fw-medium">New Expense</span>
+                            <span class="fw-medium">Expense</span>
                         </a>
                     </div>
-                    <div class="col-6 col-md-3">
-                        <a href="{{ url_for('reports.daily') }}" class="quick-action-btn w-100 h-100">
+                    <div class="col-3 col-md-2">
+                        <a href="{{ url_for('reports.daily') }}" class="quick-action-btn w-100 h-100" id="shortcut-d" title="Press 'D' for quick access">
                             <i class="bi bi-file-text text-primary"></i>
-                            <span class="mt-2 fw-medium">Daily Report</span>
+                            <span class="fw-medium">Daily</span>
                         </a>
                     </div>
-                    <div class="col-6 col-md-3">
-                        <a href="{{ url_for('accounts.balance_sheet') }}" class="quick-action-btn w-100 h-100">
+                    <div class="col-3 col-md-2">
+                        <a href="{{ url_for('accounts.balance_sheet') }}" class="quick-action-btn w-100 h-100" id="shortcut-b" title="Press 'B' for quick access">
                             <i class="bi bi-file-spreadsheet text-info"></i>
-                            <span class="mt-2 fw-medium">Balance Sheet</span>
+                            <span class="fw-medium">Balance</span>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <a href="{{ url_for('reports.fund_summary') }}" class="quick-action-btn w-100 h-100">
+                            <i class="bi bi-pie-chart text-warning"></i>
+                            <span class="fw-medium">Funds</span>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <a href="{{ url_for('accounts.trial_balance') }}" class="quick-action-btn w-100 h-100">
+                            <i class="bi bi-calculator text-secondary"></i>
+                            <span class="fw-medium">Trial Bal</span>
                         </a>
                     </div>
                 </div>
@@ -129,79 +135,76 @@
 </div>
 {% endif %}
 
-<div class="row g-4 mb-4">
-    <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-            <div class="card-header bg-warning">
-                <h6 class="mb-0"><i class="bi bi-hourglass-split me-2"></i>Pending Approvals</h6>
-            </div>
-            <div class="card-body">
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
-                        <span><i class="bi bi-check-circle me-2 text-success"></i>Income Verification</span>
-                        <span class="badge bg-warning rounded-pill">{{ pending_income_verification }}</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
-                        <span><i class="bi bi-check-square me-2 text-info"></i>Expense Verification</span>
-                        <span class="badge bg-warning rounded-pill">{{ pending_expense_verification }}</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
-                        <span><i class="bi bi-clipboard-check me-2 text-danger"></i>Expense Approval</span>
-                        <span class="badge bg-danger rounded-pill">{{ pending_expense_approval }}</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-4">
+<div class="row g-2 mb-3">
+    <div class="col-md-4">
         <div class="card h-100 zakat-card">
-            <div class="card-header">
-                <h6 class="mb-0"><i class="bi bi-heart-fill me-2"></i>Zakat Fund Status</h6>
+            <div class="card-header py-2">
+                <h6 class="mb-0" style="font-size: 0.85rem;"><i class="bi bi-heart-fill me-2"></i>Zakat Fund</h6>
             </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Collected</span>
-                        <strong class="text-success">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(zakat_collected) }}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Distributed</span>
-                        <strong class="text-danger">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(zakat_distributed) }}</strong>
-                    </div>
-                    <hr class="my-2">
-                    <div class="d-flex justify-content-between">
-                        <span class="fw-bold">Available</span>
-                        <strong class="text-success fs-5">{{ config.CURRENCY_SYMBOL }} {{ "{:,.0f}".format(zakat_collected - zakat_distributed) }}</strong>
-                    </div>
+            <div class="card-body py-2" style="font-size: 0.85rem;">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">Collected</span>
+                    <strong class="text-success">{{ config.CURRENCY_SYMBOL }}{{ "{:,.0f}".format(zakat_collected) }}</strong>
                 </div>
-                <div class="progress" style="height: 20px;">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">Distributed</span>
+                    <strong class="text-danger">{{ config.CURRENCY_SYMBOL }}{{ "{:,.0f}".format(zakat_distributed) }}</strong>
+                </div>
+                <hr class="my-1">
+                <div class="d-flex justify-content-between">
+                    <span class="fw-bold">Available</span>
+                    <strong class="text-success">{{ config.CURRENCY_SYMBOL }}{{ "{:,.0f}".format(zakat_collected - zakat_distributed) }}</strong>
+                </div>
+                <div class="progress mt-2" style="height: 10px;">
                     {% set pct = (zakat_distributed / zakat_collected * 100) if zakat_collected > 0 else 0 %}
-                    <div class="progress-bar" style="width: {{ pct }}%">
-                        {{ "{:.1f}".format(pct) }}% Distributed
-                    </div>
+                    <div class="progress-bar" style="width: {{ pct }}%"></div>
                 </div>
+                <small class="text-muted">{{ "{:.1f}".format(pct) }}% Distributed</small>
             </div>
         </div>
     </div>
-    <div class="col-lg-4">
+    <div class="col-md-4">
         <div class="card h-100">
-            <div class="card-header">
-                <h6 class="mb-0"><i class="bi bi-graph-up me-2"></i>Income vs Expense Trend</h6>
+            <div class="card-header py-2">
+                <h6 class="mb-0" style="font-size: 0.85rem;"><i class="bi bi-graph-up me-2"></i>Trend (6 Months)</h6>
             </div>
-            <div class="card-body">
-                <canvas id="trendChart" style="height: 200px;"></canvas>
+            <div class="card-body py-2">
+                <canvas id="trendChart" style="height: 130px;"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header py-2 bg-transparent" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;">
+                <h6 class="mb-0 text-white" style="font-size: 0.85rem;"><i class="bi bi-lightning-fill me-2"></i>Quick Stats</h6>
+            </div>
+            <div class="card-body py-2" style="font-size: 0.8rem;">
+                <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                    <span><span class="status-dot active"></span>Total Entries Today</span>
+                    <strong>{{ (recent_income|length) + (recent_expenses|length) }}</strong>
+                </div>
+                <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                    <span><span class="status-dot pending"></span>Net This Month</span>
+                    <strong class="{% if monthly_income - monthly_expense >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ config.CURRENCY_SYMBOL }}{{ "{:,.0f}".format(monthly_income - monthly_expense) }}
+                    </strong>
+                </div>
+                <div class="d-flex justify-content-between align-items-center py-1">
+                    <span><i class="bi bi-wallet2 me-1"></i>Total Balance</span>
+                    <strong class="text-primary">{{ config.CURRENCY_SYMBOL }}{{ "{:,.0f}".format(cash_balance + bank_balance) }}</strong>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row g-4">
+<div class="row g-2">
     <div class="col-lg-6">
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0"><i class="bi bi-cash-stack me-2"></i>Recent Income</h6>
-                <a href="{{ url_for('income.index') }}" class="btn btn-sm btn-outline-success">
-                    <i class="bi bi-arrow-right me-1"></i>View All
+            <div class="card-header d-flex justify-content-between align-items-center py-2">
+                <h6 class="mb-0" style="font-size: 0.85rem;"><i class="bi bi-cash-stack me-2"></i>Recent Income</h6>
+                <a href="{{ url_for('income.index') }}" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 0.75rem;">
+                    View All
                 </a>
             </div>
             <div class="card-body p-0">
@@ -242,10 +245,10 @@
     </div>
     <div class="col-lg-6">
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0"><i class="bi bi-credit-card me-2"></i>Recent Expenses</h6>
-                <a href="{{ url_for('expenses.index') }}" class="btn btn-sm btn-outline-danger">
-                    <i class="bi bi-arrow-right me-1"></i>View All
+            <div class="card-header d-flex justify-content-between align-items-center py-2">
+                <h6 class="mb-0" style="font-size: 0.85rem;"><i class="bi bi-credit-card me-2"></i>Recent Expenses</h6>
+                <a href="{{ url_for('expenses.index') }}" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 0.75rem;">
+                    View All
                 </a>
             </div>
             <div class="card-body p-0">
@@ -339,7 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     ticks: {
                         callback: function(value) {
-                            return 'Rs. ' + value.toLocaleString();
+                            return '₹' + value.toLocaleString('en-IN');
                         }
                     }
                 },
@@ -351,6 +354,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    switch(e.key.toLowerCase()) {
+        case 'i': window.location.href = "{{ url_for('income.create') }}"; break;
+        case 'e': window.location.href = "{{ url_for('expenses.create') }}"; break;
+        case 'd': window.location.href = "{{ url_for('reports.daily') }}"; break;
+        case 'b': window.location.href = "{{ url_for('accounts.balance_sheet') }}"; break;
+        case 'h': window.location.href = "{{ url_for('dashboard.index') }}"; break;
+    }
 });
 </script>
 {% endblock %}
