@@ -14,26 +14,36 @@ def get_income_accounts(user_id, category, payment_mode):
     fund_type = IncomeCategory.FUND_MAPPING.get(category, FundType.GENERAL)
     
     category_to_account = {
-        IncomeCategory.SALARY: '4000',
-        IncomeCategory.FREELANCE: '4010',
-        IncomeCategory.INVESTMENT: '4020',
-        IncomeCategory.GIFT: '4030',
-        IncomeCategory.RENTAL: '4040',
-        IncomeCategory.OTHER: '4050',
-        IncomeCategory.REFUND: '4050',
+        IncomeCategory.ZAKAT: '4000',
+        IncomeCategory.SADAQAH: '4010',
+        IncomeCategory.FITRAH: '4020',
+        IncomeCategory.LILLAH: '4030',
+        IncomeCategory.DONATION: '4040',
+        IncomeCategory.RENTAL: '4050',
+        IncomeCategory.SPECIAL: '4060',
+        IncomeCategory.AMANAH: '4070',
+        IncomeCategory.OTHER: '4080',
+        IncomeCategory.FIDYAH: '4010',
+        IncomeCategory.KAFFARAH: '4010',
+        IncomeCategory.AQEEQAH: '4010',
+        IncomeCategory.QURBANI: '4010',
     }
     income_account = Account.query.filter_by(
         user_id=user_id,
-        code=category_to_account.get(category, '4050')
+        code=category_to_account.get(category, '4080')
     ).first()
     
     if payment_mode == PaymentMode.CASH:
         asset_account = Account.query.filter_by(user_id=user_id, code='1000').first()
     else:
-        if fund_type == FundType.SAVINGS:
+        if fund_type == FundType.ZAKAT:
             asset_account = Account.query.filter_by(user_id=user_id, code='1020').first()
-        elif fund_type == FundType.EMERGENCY:
+        elif fund_type == FundType.SADAQAH:
             asset_account = Account.query.filter_by(user_id=user_id, code='1030').first()
+        elif fund_type == FundType.AMANAH:
+            asset_account = Account.query.filter_by(user_id=user_id, code='1040').first()
+        elif fund_type == FundType.LILLAH:
+            asset_account = Account.query.filter_by(user_id=user_id, code='1050').first()
         else:
             asset_account = Account.query.filter_by(user_id=user_id, code='1010').first()
     

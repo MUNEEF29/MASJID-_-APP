@@ -140,21 +140,29 @@
     <div class="col-md-4">
         <div class="card h-100 zakat-card">
             <div class="card-header py-2">
-                <h6 class="mb-0" style="font-size: 0.85rem;"><i class="bi bi-heart-fill me-2"></i>Savings Fund</h6>
+                <h6 class="mb-0" style="font-size: 0.85rem;"><i class="bi bi-heart-fill me-2"></i>Islamic Funds (فنڈز)</h6>
             </div>
             <div class="card-body py-2" style="font-size: 0.85rem;">
                 <div class="d-flex justify-content-between mb-1">
-                    <span class="text-muted">Total Savings</span>
-                    <strong class="text-success">{{ app_settings.get('currency_symbol', config.CURRENCY_SYMBOL) }}{{ "{:,.0f}".format(total_savings) }}</strong>
+                    <span class="text-muted">Zakat (زکوٰۃ)</span>
+                    <strong class="text-success">{{ app_settings.get('currency_symbol', config.CURRENCY_SYMBOL) }}{{ "{:,.0f}".format(total_zakat) }}</strong>
                 </div>
                 <div class="d-flex justify-content-between mb-1">
-                    <span class="text-muted">Investments</span>
-                    <strong class="text-primary">{{ app_settings.get('currency_symbol', config.CURRENCY_SYMBOL) }}{{ "{:,.0f}".format(total_investments) }}</strong>
+                    <span class="text-muted">Sadaqah (صدقہ)</span>
+                    <strong class="text-primary">{{ app_settings.get('currency_symbol', config.CURRENCY_SYMBOL) }}{{ "{:,.0f}".format(total_sadaqah) }}</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">Lillah (للّٰہ)</span>
+                    <strong class="text-info">{{ app_settings.get('currency_symbol', config.CURRENCY_SYMBOL) }}{{ "{:,.0f}".format(total_lillah) }}</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">Amanah (امانت)</span>
+                    <strong class="text-warning">{{ app_settings.get('currency_symbol', config.CURRENCY_SYMBOL) }}{{ "{:,.0f}".format(total_amanah) }}</strong>
                 </div>
                 <hr class="my-1">
                 <div class="d-flex justify-content-between">
-                    <span class="fw-bold">Total Assets</span>
-                    <strong class="text-success">{{ app_settings.get('currency_symbol', config.CURRENCY_SYMBOL) }}{{ "{:,.0f}".format(total_savings + total_investments) }}</strong>
+                    <span class="fw-bold">Total Funds</span>
+                    <strong class="text-success">{{ app_settings.get('currency_symbol', config.CURRENCY_SYMBOL) }}{{ "{:,.0f}".format(total_zakat + total_sadaqah + total_lillah + total_amanah) }}</strong>
                 </div>
                 <div class="mt-2">
                     <a href="{{ url_for('ai_assistant.index') }}" class="btn btn-outline-success btn-sm w-100">

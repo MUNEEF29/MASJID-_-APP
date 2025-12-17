@@ -17,29 +17,36 @@ def allowed_file(filename):
 
 def get_expense_accounts(user_id, category, payment_mode, fund_type):
     category_to_account = {
-        ExpenseCategory.FOOD: '5000',
-        ExpenseCategory.TRANSPORT: '5010',
-        ExpenseCategory.UTILITIES: '5020',
-        ExpenseCategory.RENT: '5030',
-        ExpenseCategory.SHOPPING: '5040',
-        ExpenseCategory.ENTERTAINMENT: '5050',
-        ExpenseCategory.HEALTHCARE: '5060',
-        ExpenseCategory.EDUCATION: '5070',
-        ExpenseCategory.INVESTMENT: '5080',
-        ExpenseCategory.OTHER: '5090',
+        ExpenseCategory.ZAKAT_DISBURSEMENT: '5000',
+        ExpenseCategory.SADAQAH_DISBURSEMENT: '5010',
+        ExpenseCategory.SALARIES: '5020',
+        ExpenseCategory.UTILITIES: '5030',
+        ExpenseCategory.MAINTENANCE: '5040',
+        ExpenseCategory.CONSTRUCTION: '5050',
+        ExpenseCategory.EDUCATION: '5060',
+        ExpenseCategory.EVENTS: '5070',
+        ExpenseCategory.FOOD: '5080',
+        ExpenseCategory.SUPPLIES: '5090',
+        ExpenseCategory.OTHER: '5100',
+        ExpenseCategory.POOR_NEEDY: '5010',
+        ExpenseCategory.FUNERAL: '5070',
     }
     expense_account = Account.query.filter_by(
         user_id=user_id,
-        code=category_to_account.get(category, '5090')
+        code=category_to_account.get(category, '5100')
     ).first()
     
     if payment_mode == PaymentMode.CASH:
         asset_account = Account.query.filter_by(user_id=user_id, code='1000').first()
     else:
-        if fund_type == FundType.SAVINGS:
+        if fund_type == FundType.ZAKAT:
             asset_account = Account.query.filter_by(user_id=user_id, code='1020').first()
-        elif fund_type == FundType.EMERGENCY:
+        elif fund_type == FundType.SADAQAH:
             asset_account = Account.query.filter_by(user_id=user_id, code='1030').first()
+        elif fund_type == FundType.AMANAH:
+            asset_account = Account.query.filter_by(user_id=user_id, code='1040').first()
+        elif fund_type == FundType.LILLAH:
+            asset_account = Account.query.filter_by(user_id=user_id, code='1050').first()
         else:
             asset_account = Account.query.filter_by(user_id=user_id, code='1010').first()
     

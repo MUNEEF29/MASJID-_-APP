@@ -41,17 +41,33 @@ def index():
         Expense.approval_status == ApprovalStatus.APPROVED
     ).scalar() or Decimal('0')
     
-    savings_accounts = Account.query.filter(
+    zakat_accounts = Account.query.filter(
         Account.user_id == current_user.id,
-        Account.fund_type == FundType.SAVINGS,
+        Account.fund_type == FundType.ZAKAT,
         Account.account_type == AccountType.ASSET
     ).all()
-    total_savings = sum(acc.get_balance() for acc in savings_accounts)
+    total_zakat = sum(acc.get_balance() for acc in zakat_accounts)
     
-    investment_account = Account.query.filter_by(
-        user_id=current_user.id, code='1100'
-    ).first()
-    total_investments = investment_account.get_balance() if investment_account else Decimal('0')
+    sadaqah_accounts = Account.query.filter(
+        Account.user_id == current_user.id,
+        Account.fund_type == FundType.SADAQAH,
+        Account.account_type == AccountType.ASSET
+    ).all()
+    total_sadaqah = sum(acc.get_balance() for acc in sadaqah_accounts)
+    
+    lillah_accounts = Account.query.filter(
+        Account.user_id == current_user.id,
+        Account.fund_type == FundType.LILLAH,
+        Account.account_type == AccountType.ASSET
+    ).all()
+    total_lillah = sum(acc.get_balance() for acc in lillah_accounts)
+    
+    amanah_accounts = Account.query.filter(
+        Account.user_id == current_user.id,
+        Account.fund_type == FundType.AMANAH,
+        Account.account_type == AccountType.ASSET
+    ).all()
+    total_amanah = sum(acc.get_balance() for acc in amanah_accounts)
     
     recent_income = Income.query.filter_by(
         user_id=current_user.id,
@@ -110,15 +126,15 @@ def index():
         bank_balance=bank_balance,
         monthly_income=monthly_income,
         monthly_expense=monthly_expense,
-        total_savings=total_savings,
-        total_investments=total_investments,
+        total_zakat=total_zakat,
+        total_sadaqah=total_sadaqah,
+        total_lillah=total_lillah,
+        total_amanah=total_amanah,
         net_this_month=net_this_month,
         recent_income=recent_income,
         recent_expenses=recent_expenses,
         chart_months=months,
         chart_income=income_data,
         chart_expense=expense_data,
-        zakat_collected=zakat_collected,
-        zakat_distributed=zakat_distributed,
         alerts=alerts
     )

@@ -31,23 +31,49 @@ A production-ready, audit-grade web-based accounting application designed for **
 - Every action logged with user and timestamp
 - Session-based authentication with Flask-Login
 
-### Income Management
-- Support for: Donations, Zakat, Sadaqah, Fitrah, Special Collections, Rental Income
+### Income Management (Islamic Categories)
+- **Zakat (زکوٰۃ)** - Ring-fenced obligatory charity
+- **Sadaqah (صدقہ)** - Voluntary charity
+- **Fitrah/Zakat-ul-Fitr (فطرہ)** - Ramadan charity
+- **Lillah (للّٰہ)** - For the sake of Allah
+- **General Donation (عطیہ)** - Regular donations
+- **Fidyah (فدیہ)** - Compensation for missed fasts
+- **Kaffarah (کفارہ)** - Expiation payments
+- **Aqeeqah (عقیقہ)** - Birth celebration sacrifice
+- **Qurbani/Udhiyah (قربانی)** - Eid sacrifice
+- **Rental Income (کرایہ)** - Property rental
+- **Special Collection (خصوصی چندہ)** - Event collections
+- **Amanah/Trust (امانت)** - Trust funds
 - Auto-generated receipt numbers
-- Automatic posting to accounts on creation (no verification required)
-- Full audit trail
-- Currency: Indian Rupee (₹)
+- Full audit trail with Urdu labels
 
-### Expense Management
-- Support for: Salaries, Utilities, Maintenance, Vendor Payments, Charity Disbursement, Asset Purchases
+### Expense Management (Islamic Categories)
+- **Zakat Disbursement (زکوٰۃ کی تقسیم)** - Zakat given to eligible recipients
+- **Sadaqah Disbursement (صدقہ کی تقسیم)** - Charity given out
+- **Salaries & Wages (تنخواہ)** - Imam, staff salaries
+- **Utilities & Bills (بجلی پانی)** - Electricity, water, gas
+- **Maintenance & Repairs (مرمت)** - Building maintenance
+- **Construction & Renovation (تعمیر)** - Building projects
+- **Poor & Needy Aid (غریب امداد)** - Helping the poor
+- **Education & Madrasah (تعلیم)** - Religious education
+- **Funeral Services (جنازہ)** - Funeral arrangements
+- **Islamic Events (اسلامی تقریبات)** - Programs and events
+- **Masjid Supplies (سامان)** - General supplies
+- **Food & Langar (کھانا)** - Community meals
 - Voucher system with supporting document upload
-- Automatic posting to accounts on creation (no verification/approval required)
 - No deletion - only reversals allowed
 
+### Fund Types (Islamic Finance)
+- **General Fund** - General masjid operations
+- **Zakat Fund (Ring-fenced)** - Strictly for eligible Zakat recipients only
+- **Sadaqah Fund** - Flexible charitable use
+- **Amanah/Trust Fund** - Funds held in trust
+- **Lillah Fund** - For Allah's cause (masjid operations)
+
 ### Double-Entry Accounting
-- Chart of Accounts with proper account types
-- Automatic journal entries on verification/approval
-- Separate fund tracking: General Fund, Zakat Fund (ring-fenced), Amanah/Trust Fund
+- Chart of Accounts with proper Islamic account types
+- Automatic journal entries on creation
+- Separate fund tracking with strict Zakat separation
 - Trial Balance, Income & Expenditure Statement, Balance Sheet
 
 ### Islamic Compliance

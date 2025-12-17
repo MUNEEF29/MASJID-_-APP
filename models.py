@@ -44,15 +44,19 @@ class User(UserMixin, db.Model):
 
 class FundType:
     GENERAL = 'general'
-    SAVINGS = 'savings'
-    EMERGENCY = 'emergency'
+    ZAKAT = 'zakat'
+    SADAQAH = 'sadaqah'
+    AMANAH = 'amanah'
+    LILLAH = 'lillah'
     
-    ALL_FUNDS = [GENERAL, SAVINGS, EMERGENCY]
+    ALL_FUNDS = [GENERAL, ZAKAT, SADAQAH, AMANAH, LILLAH]
     
     FUND_NAMES = {
         GENERAL: 'General Fund',
-        SAVINGS: 'Savings Fund',
-        EMERGENCY: 'Emergency Fund'
+        ZAKAT: 'Zakat Fund (Ring-fenced)',
+        SADAQAH: 'Sadaqah Fund',
+        AMANAH: 'Amanah/Trust Fund',
+        LILLAH: 'Lillah Fund'
     }
 
 
@@ -143,33 +147,51 @@ class Transaction(db.Model):
 
 
 class IncomeCategory:
-    SALARY = 'salary'
-    FREELANCE = 'freelance'
-    INVESTMENT = 'investment'
-    GIFT = 'gift'
-    REFUND = 'refund'
+    ZAKAT = 'zakat'
+    SADAQAH = 'sadaqah'
+    FITRAH = 'fitrah'
+    LILLAH = 'lillah'
+    DONATION = 'donation'
+    FIDYAH = 'fidyah'
+    KAFFARAH = 'kaffarah'
+    AQEEQAH = 'aqeeqah'
+    QURBANI = 'qurbani'
     RENTAL = 'rental'
+    SPECIAL = 'special'
+    AMANAH = 'amanah'
     OTHER = 'other'
     
-    ALL_CATEGORIES = [SALARY, FREELANCE, INVESTMENT, GIFT, REFUND, RENTAL, OTHER]
+    ALL_CATEGORIES = [ZAKAT, SADAQAH, FITRAH, LILLAH, DONATION, FIDYAH, KAFFARAH, AQEEQAH, QURBANI, RENTAL, SPECIAL, AMANAH, OTHER]
     
     CATEGORY_NAMES = {
-        SALARY: 'Salary/Wages',
-        FREELANCE: 'Freelance/Business',
-        INVESTMENT: 'Investment Returns',
-        GIFT: 'Gift/Bonus',
-        REFUND: 'Refund',
-        RENTAL: 'Rental Income',
-        OTHER: 'Other Income'
+        ZAKAT: 'Zakat (زکوٰۃ)',
+        SADAQAH: 'Sadaqah (صدقہ)',
+        FITRAH: 'Fitrah/Zakat-ul-Fitr (فطرہ)',
+        LILLAH: 'Lillah (للّٰہ)',
+        DONATION: 'General Donation (عطیہ)',
+        FIDYAH: 'Fidyah (فدیہ)',
+        KAFFARAH: 'Kaffarah (کفارہ)',
+        AQEEQAH: 'Aqeeqah (عقیقہ)',
+        QURBANI: 'Qurbani/Udhiyah (قربانی)',
+        RENTAL: 'Rental Income (کرایہ)',
+        SPECIAL: 'Special Collection (خصوصی چندہ)',
+        AMANAH: 'Amanah/Trust (امانت)',
+        OTHER: 'Other Income (دیگر آمدنی)'
     }
     
     FUND_MAPPING = {
-        SALARY: FundType.GENERAL,
-        FREELANCE: FundType.GENERAL,
-        INVESTMENT: FundType.SAVINGS,
-        GIFT: FundType.GENERAL,
-        REFUND: FundType.GENERAL,
+        ZAKAT: FundType.ZAKAT,
+        SADAQAH: FundType.SADAQAH,
+        FITRAH: FundType.ZAKAT,
+        LILLAH: FundType.LILLAH,
+        DONATION: FundType.GENERAL,
+        FIDYAH: FundType.SADAQAH,
+        KAFFARAH: FundType.SADAQAH,
+        AQEEQAH: FundType.SADAQAH,
+        QURBANI: FundType.SADAQAH,
         RENTAL: FundType.GENERAL,
+        SPECIAL: FundType.GENERAL,
+        AMANAH: FundType.AMANAH,
         OTHER: FundType.GENERAL
     }
 
@@ -264,30 +286,36 @@ class Income(db.Model):
 
 
 class ExpenseCategory:
-    FOOD = 'food'
-    TRANSPORT = 'transport'
+    SALARIES = 'salaries'
     UTILITIES = 'utilities'
-    RENT = 'rent'
-    SHOPPING = 'shopping'
-    ENTERTAINMENT = 'entertainment'
-    HEALTHCARE = 'healthcare'
+    MAINTENANCE = 'maintenance'
+    CONSTRUCTION = 'construction'
+    ZAKAT_DISBURSEMENT = 'zakat_disbursement'
+    SADAQAH_DISBURSEMENT = 'sadaqah_disbursement'
+    POOR_NEEDY = 'poor_needy'
     EDUCATION = 'education'
-    INVESTMENT = 'investment'
+    FUNERAL = 'funeral'
+    EVENTS = 'events'
+    SUPPLIES = 'supplies'
+    FOOD = 'food'
     OTHER = 'other'
     
-    ALL_CATEGORIES = [FOOD, TRANSPORT, UTILITIES, RENT, SHOPPING, ENTERTAINMENT, HEALTHCARE, EDUCATION, INVESTMENT, OTHER]
+    ALL_CATEGORIES = [SALARIES, UTILITIES, MAINTENANCE, CONSTRUCTION, ZAKAT_DISBURSEMENT, SADAQAH_DISBURSEMENT, POOR_NEEDY, EDUCATION, FUNERAL, EVENTS, SUPPLIES, FOOD, OTHER]
     
     CATEGORY_NAMES = {
-        FOOD: 'Food & Dining',
-        TRANSPORT: 'Transportation',
-        UTILITIES: 'Utilities & Bills',
-        RENT: 'Rent/Mortgage',
-        SHOPPING: 'Shopping',
-        ENTERTAINMENT: 'Entertainment',
-        HEALTHCARE: 'Healthcare',
-        EDUCATION: 'Education',
-        INVESTMENT: 'Investment',
-        OTHER: 'Other Expenses'
+        SALARIES: 'Salaries & Wages (تنخواہ)',
+        UTILITIES: 'Utilities & Bills (بجلی پانی)',
+        MAINTENANCE: 'Maintenance & Repairs (مرمت)',
+        CONSTRUCTION: 'Construction & Renovation (تعمیر)',
+        ZAKAT_DISBURSEMENT: 'Zakat Disbursement (زکوٰۃ کی تقسیم)',
+        SADAQAH_DISBURSEMENT: 'Sadaqah Disbursement (صدقہ کی تقسیم)',
+        POOR_NEEDY: 'Poor & Needy Aid (غریب امداد)',
+        EDUCATION: 'Education & Madrasah (تعلیم)',
+        FUNERAL: 'Funeral Services (جنازہ)',
+        EVENTS: 'Islamic Events (اسلامی تقریبات)',
+        SUPPLIES: 'Masjid Supplies (سامان)',
+        FOOD: 'Food & Langar (کھانا)',
+        OTHER: 'Other Expenses (دیگر اخراجات)'
     }
 
 
@@ -435,38 +463,45 @@ class PeriodLock(db.Model):
 
 
 def create_default_accounts_for_user(user_id):
-    """Create default chart of accounts for a new user"""
+    """Create default chart of accounts for a masjid"""
     default_accounts = [
-        ('1000', 'Cash in Hand', AccountType.ASSET, FundType.GENERAL, 'Physical cash'),
-        ('1010', 'Bank Account - Primary', AccountType.ASSET, FundType.GENERAL, 'Main bank account'),
-        ('1020', 'Bank Account - Savings', AccountType.ASSET, FundType.SAVINGS, 'Savings account'),
-        ('1030', 'Bank Account - Emergency', AccountType.ASSET, FundType.EMERGENCY, 'Emergency fund account'),
-        ('1100', 'Investments', AccountType.ASSET, FundType.SAVINGS, 'Investment portfolio'),
+        ('1000', 'Cash in Hand (نقدی)', AccountType.ASSET, FundType.GENERAL, 'Physical cash in masjid'),
+        ('1010', 'Bank Account - General', AccountType.ASSET, FundType.GENERAL, 'Main bank account'),
+        ('1020', 'Bank Account - Zakat', AccountType.ASSET, FundType.ZAKAT, 'Zakat fund bank account'),
+        ('1030', 'Bank Account - Sadaqah', AccountType.ASSET, FundType.SADAQAH, 'Sadaqah fund account'),
+        ('1040', 'Bank Account - Amanah', AccountType.ASSET, FundType.AMANAH, 'Trust/Amanah fund account'),
+        ('1050', 'Bank Account - Lillah', AccountType.ASSET, FundType.LILLAH, 'Lillah fund account'),
         
-        ('2000', 'Credit Card', AccountType.LIABILITY, FundType.GENERAL, 'Credit card balance'),
-        ('2010', 'Loans Payable', AccountType.LIABILITY, FundType.GENERAL, 'Loan balances'),
+        ('2000', 'Payables', AccountType.LIABILITY, FundType.GENERAL, 'Amounts owed'),
+        ('2010', 'Amanah Liability', AccountType.LIABILITY, FundType.AMANAH, 'Trust amounts to be returned'),
         
         ('3000', 'General Fund Balance', AccountType.EQUITY, FundType.GENERAL, 'Net worth - General'),
-        ('3010', 'Savings Fund Balance', AccountType.EQUITY, FundType.SAVINGS, 'Net worth - Savings'),
-        ('3020', 'Emergency Fund Balance', AccountType.EQUITY, FundType.EMERGENCY, 'Net worth - Emergency'),
+        ('3010', 'Zakat Fund Balance', AccountType.EQUITY, FundType.ZAKAT, 'Net worth - Zakat (Ring-fenced)'),
+        ('3020', 'Sadaqah Fund Balance', AccountType.EQUITY, FundType.SADAQAH, 'Net worth - Sadaqah'),
+        ('3030', 'Amanah Fund Balance', AccountType.EQUITY, FundType.AMANAH, 'Net worth - Amanah/Trust'),
+        ('3040', 'Lillah Fund Balance', AccountType.EQUITY, FundType.LILLAH, 'Net worth - Lillah'),
         
-        ('4000', 'Salary Income', AccountType.INCOME, FundType.GENERAL, 'Salary and wages'),
-        ('4010', 'Freelance Income', AccountType.INCOME, FundType.GENERAL, 'Freelance earnings'),
-        ('4020', 'Investment Income', AccountType.INCOME, FundType.SAVINGS, 'Investment returns'),
-        ('4030', 'Gift Income', AccountType.INCOME, FundType.GENERAL, 'Gifts and bonuses'),
-        ('4040', 'Rental Income', AccountType.INCOME, FundType.GENERAL, 'Property rental income'),
-        ('4050', 'Other Income', AccountType.INCOME, FundType.GENERAL, 'Miscellaneous income'),
+        ('4000', 'Zakat Income (زکوٰۃ)', AccountType.INCOME, FundType.ZAKAT, 'Zakat received'),
+        ('4010', 'Sadaqah Income (صدقہ)', AccountType.INCOME, FundType.SADAQAH, 'Sadaqah/Charity received'),
+        ('4020', 'Fitrah Income (فطرہ)', AccountType.INCOME, FundType.ZAKAT, 'Zakat-ul-Fitr received'),
+        ('4030', 'Lillah Income (للّٰہ)', AccountType.INCOME, FundType.LILLAH, 'Lillah donations'),
+        ('4040', 'General Donations (عطیہ)', AccountType.INCOME, FundType.GENERAL, 'General donations'),
+        ('4050', 'Rental Income (کرایہ)', AccountType.INCOME, FundType.GENERAL, 'Property rental income'),
+        ('4060', 'Special Collections (خصوصی)', AccountType.INCOME, FundType.GENERAL, 'Special event collections'),
+        ('4070', 'Amanah Received (امانت)', AccountType.INCOME, FundType.AMANAH, 'Trust amounts received'),
+        ('4080', 'Other Income (دیگر)', AccountType.INCOME, FundType.GENERAL, 'Miscellaneous income'),
         
-        ('5000', 'Food & Dining', AccountType.EXPENSE, FundType.GENERAL, 'Food expenses'),
-        ('5010', 'Transportation', AccountType.EXPENSE, FundType.GENERAL, 'Travel and transport'),
-        ('5020', 'Utilities', AccountType.EXPENSE, FundType.GENERAL, 'Bills and utilities'),
-        ('5030', 'Rent/Mortgage', AccountType.EXPENSE, FundType.GENERAL, 'Housing costs'),
-        ('5040', 'Shopping', AccountType.EXPENSE, FundType.GENERAL, 'Shopping expenses'),
-        ('5050', 'Entertainment', AccountType.EXPENSE, FundType.GENERAL, 'Entertainment and leisure'),
-        ('5060', 'Healthcare', AccountType.EXPENSE, FundType.GENERAL, 'Medical expenses'),
-        ('5070', 'Education', AccountType.EXPENSE, FundType.GENERAL, 'Education expenses'),
-        ('5080', 'Investment', AccountType.EXPENSE, FundType.SAVINGS, 'Investment contributions'),
-        ('5090', 'Other Expenses', AccountType.EXPENSE, FundType.GENERAL, 'Miscellaneous expenses'),
+        ('5000', 'Zakat Disbursement (زکوٰۃ تقسیم)', AccountType.EXPENSE, FundType.ZAKAT, 'Zakat given to eligible recipients'),
+        ('5010', 'Sadaqah Disbursement (صدقہ تقسیم)', AccountType.EXPENSE, FundType.SADAQAH, 'Sadaqah given out'),
+        ('5020', 'Salaries & Wages (تنخواہ)', AccountType.EXPENSE, FundType.GENERAL, 'Imam, staff salaries'),
+        ('5030', 'Utilities (بجلی پانی)', AccountType.EXPENSE, FundType.GENERAL, 'Electricity, water, gas'),
+        ('5040', 'Maintenance (مرمت)', AccountType.EXPENSE, FundType.GENERAL, 'Repairs and maintenance'),
+        ('5050', 'Construction (تعمیر)', AccountType.EXPENSE, FundType.GENERAL, 'Building and renovation'),
+        ('5060', 'Education (تعلیم)', AccountType.EXPENSE, FundType.GENERAL, 'Madrasah and education'),
+        ('5070', 'Events (تقریبات)', AccountType.EXPENSE, FundType.GENERAL, 'Islamic events and programs'),
+        ('5080', 'Food & Langar (کھانا)', AccountType.EXPENSE, FundType.GENERAL, 'Food for events'),
+        ('5090', 'Supplies (سامان)', AccountType.EXPENSE, FundType.GENERAL, 'Masjid supplies'),
+        ('5100', 'Other Expenses (دیگر)', AccountType.EXPENSE, FundType.GENERAL, 'Miscellaneous expenses'),
     ]
     
     for code, name, acc_type, fund_type, description in default_accounts:
