@@ -1,7 +1,7 @@
 from datetime import datetime
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
-from models import db, User, AuditLog, PeriodLock
+from models import db, User, AuditLog, PeriodLock, AppSettings
 from routes.auth import log_action
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -92,3 +92,39 @@ def delete_period_lock(id):
     
     flash(f'Period {month}/{year} unlocked successfully.', 'success')
     return redirect(url_for('admin.period_locks'))
+
+
+@admin_bp.route('/settings')
+@login_required
+def settings():
+    settings = AppSettings.get_all_settings()
+    return render_template('admin/settings.html', settings=settings)
+
+
+@admin_bp.route('/settings/update', methods=['POST'])
+@login_required
+def update_settings():
+    app_name = request.form.get('app_name', '').strip()
+    app_name_arabic = request.form.get('app_name_arabic', '').strip()
+    app_tagline = request.form.get('app_tagline', '').strip()
+    currency_symbol = request.form.get('currency_symbol', '').strip()
+    currency_code = request.form.get('currency_code', '').strip()
+    
+    old_settings = AppSettings.get_all_settings()
+    
+    if app_name:
+        AppSettings.set_setting('app_name', app_name)
+    if app_name_arabic:
+        AppSettings.set_setting('app_name_arabic', app_name_arabic)
+    if app_tagline:
+        AppSettings.set_setting('app_tagline', app_tagline)
+    if currency_symbol:
+        AppSettings.set_setting('currency_symbol', currency_symbol)
+    if currency_code:
+        AppSettings.set_setting('currency_code', currency_code)
+    
+    new_settings = AppSettings.get_all_settings()
+    log_action('update', 'app_settings', None, old_settings, new_settings, 'Updated application settings')
+    
+    flash('Settings updated successfully.', 'success')
+    return redirect(url_for('admin.settings'))

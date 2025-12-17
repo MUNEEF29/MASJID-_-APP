@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}App Settings - {{ app_settings.get('app_name', config.APP_NAME) }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex align-items-center mb-3">
+            <h2 class="page-title mb-0">
+                <i class="bi bi-gear-fill me-2" style="color: var(--primary-gold);"></i>
+                Application Settings
+            </h2>
+        </div>
+        <p class="text-muted">Customize your masjid application name, tagline, and other settings</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-building me-2"></i>Masjid Information
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('admin.update_settings') }}">
+                    <div class="mb-4">
+                        <label for="app_name" class="form-label fw-bold">
+                            <i class="bi bi-type me-1"></i>Application Name (English)
+                        </label>
+                        <input type="text" class="form-control form-control-lg" id="app_name" name="app_name" 
+                               value="{{ settings.get('app_name', config.APP_NAME) }}"
+                               placeholder="Enter masjid name in English">
+                        <div class="form-text">This name will appear in the header and throughout the application</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="app_name_arabic" class="form-label fw-bold">
+                            <i class="bi bi-translate me-1"></i>Application Name (Arabic/Urdu)
+                        </label>
+                        <input type="text" class="form-control form-control-lg text-end" id="app_name_arabic" name="app_name_arabic" 
+                               value="{{ settings.get('app_name_arabic', config.APP_NAME_ARABIC) }}"
+                               placeholder="Enter masjid name in Arabic/Urdu" dir="rtl"
+                               style="font-family: 'Amiri', serif; font-size: 1.3rem;">
+                        <div class="form-text">Arabic/Urdu name displayed alongside the English name</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="app_tagline" class="form-label fw-bold">
+                            <i class="bi bi-chat-quote me-1"></i>Tagline / Description
+                        </label>
+                        <input type="text" class="form-control" id="app_tagline" name="app_tagline" 
+                               value="{{ settings.get('app_tagline', config.APP_TAGLINE) }}"
+                               placeholder="Enter a short description or tagline">
+                        <div class="form-text">A short description that appears below the app name on the login page</div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <h5 class="mb-3"><i class="bi bi-currency-exchange me-2"></i>Currency Settings</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="currency_symbol" class="form-label fw-bold">Currency Symbol</label>
+                            <input type="text" class="form-control" id="currency_symbol" name="currency_symbol" 
+                                   value="{{ settings.get('currency_symbol', config.CURRENCY_SYMBOL) }}"
+                                   placeholder="e.g., ₹, $, £">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="currency_code" class="form-label fw-bold">Currency Code</label>
+                            <input type="text" class="form-control" id="currency_code" name="currency_code" 
+                                   value="{{ settings.get('currency_code', config.CURRENCY_CODE) }}"
+                                   placeholder="e.g., INR, USD, GBP">
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <button type="submit" class="btn btn-success btn-lg px-4">
+                            <i class="bi bi-check-lg me-2"></i>Save Settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-eye me-2"></i>Preview
+            </div>
+            <div class="card-body text-center py-4">
+                <div class="mosque-preview-icon mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary-emerald) 0%, var(--dark-emerald) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; border: 3px solid var(--primary-gold);">
+                    <i class="bi bi-building" style="font-size: 2rem; color: var(--primary-gold);"></i>
+                </div>
+                <h5 class="mb-1" style="color: var(--primary-emerald);" id="preview-name">
+                    {{ settings.get('app_name', config.APP_NAME) }}
+                </h5>
+                <p class="mb-2" style="font-family: 'Amiri', serif; color: var(--primary-gold); direction: rtl;" id="preview-arabic">
+                    {{ settings.get('app_name_arabic', config.APP_NAME_ARABIC) }}
+                </p>
+                <p class="text-muted small mb-0" id="preview-tagline">
+                    {{ settings.get('app_tagline', config.APP_TAGLINE) }}
+                </p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-warning">
+                <i class="bi bi-info-circle me-2"></i>Information
+            </div>
+            <div class="card-body">
+                <ul class="mb-0 ps-3">
+                    <li class="mb-2">Changes will be reflected immediately across the application</li>
+                    <li class="mb-2">Use Urdu or Arabic script for the Arabic name field</li>
+                    <li class="mb-2">Currency symbol will be used in all financial displays</li>
+                    <li>All changes are logged in the audit trail</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('app_name').addEventListener('input', function() {
+    document.getElementById('preview-name').textContent = this.value || '{{ config.APP_NAME }}';
+});
+
+document.getElementById('app_name_arabic').addEventListener('input', function() {
+    document.getElementById('preview-arabic').textContent = this.value || '{{ config.APP_NAME_ARABIC }}';
+});
+
+document.getElementById('app_tagline').addEventListener('input', function() {
+    document.getElementById('preview-tagline').textContent = this.value || '{{ config.APP_TAGLINE }}';
+});
+</script>
+{% endblock %}

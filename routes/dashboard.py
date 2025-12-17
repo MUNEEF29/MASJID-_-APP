@@ -101,6 +101,10 @@ def index():
     
     net_this_month = monthly_income - monthly_expense
     
+    zakat_collected = Decimal('0')
+    zakat_distributed = Decimal('0')
+    alerts = []
+    
     return render_template('dashboard/index.html',
         cash_balance=cash_balance,
         bank_balance=bank_balance,
@@ -113,5 +117,8 @@ def index():
         recent_expenses=recent_expenses,
         chart_months=months,
         chart_income=income_data,
-        chart_expense=expense_data
+        chart_expense=expense_data,
+        zakat_collected=zakat_collected,
+        zakat_distributed=zakat_distributed,
+        alerts=alerts
     )

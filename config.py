@@ -27,11 +27,12 @@ class Config:
     
     FISCAL_YEAR_START_MONTH = 1
     
-    APP_NAME = "Personal Finance Manager"
-    APP_TAGLINE = "Your Personal Accounting Solution"
-    CURRENCY_SYMBOL = "$"
-    CURRENCY_CODE = "USD"
-    CURRENCY_NAME = "US Dollar"
+    APP_NAME = "MSJID E AMEER E MUAVIYYAH"
+    APP_NAME_ARABIC = "مسجد امیر معاویہ"
+    APP_TAGLINE = "Islamic Accounting & Financial Management System"
+    CURRENCY_SYMBOL = "₹"
+    CURRENCY_CODE = "INR"
+    CURRENCY_NAME = "Indian Rupee"
     
     GOOGLE_OAUTH_CLIENT_ID = os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
     GOOGLE_OAUTH_CLIENT_SECRET = os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET')

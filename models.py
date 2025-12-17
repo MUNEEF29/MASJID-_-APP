@@ -365,6 +365,49 @@ class AuditLog(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
 
+class AppSettings(db.Model):
+    __tablename__ = 'app_settings'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(100), unique=True, nullable=False)
+    value = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    @staticmethod
+    def get_setting(key, default=None):
+        setting = AppSettings.query.filter_by(key=key).first()
+        return setting.value if setting else default
+    
+    @staticmethod
+    def set_setting(key, value):
+        setting = AppSettings.query.filter_by(key=key).first()
+        if setting:
+            setting.value = value
+        else:
+            setting = AppSettings(key=key, value=value)
+            db.session.add(setting)
+        db.session.commit()
+        return setting
+    
+    @staticmethod
+    def get_all_settings():
+        settings = AppSettings.query.all()
+        return {s.key: s.value for s in settings}
+
+
+class AIChatHistory(db.Model):
+    __tablename__ = 'ai_chat_history'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    message = db.Column(db.Text, nullable=False)
+    response = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    
+    user = db.relationship('User', backref='ai_chats')
+
+
 class PeriodLock(db.Model):
     __tablename__ = 'period_locks'
     

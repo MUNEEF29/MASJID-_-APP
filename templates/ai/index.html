@@ -1,0 +1,486 @@
+{% extends "base.html" %}
+
+{% block title %}Islamic AI Assistant - {{ app_settings.get('app_name', config.APP_NAME) }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.chat-container {
+    height: calc(100vh - 300px);
+    min-height: 400px;
+    overflow-y: auto;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(232,245,240,0.5) 100%);
+    padding: 1.5rem;
+}
+
+.message {
+    margin-bottom: 1rem;
+    animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message-user {
+    text-align: right;
+}
+
+.message-user .message-content {
+    background: linear-gradient(135deg, var(--primary-emerald) 0%, var(--dark-emerald) 100%);
+    color: white;
+    border-radius: 18px 18px 4px 18px;
+    display: inline-block;
+    max-width: 80%;
+    padding: 0.75rem 1.25rem;
+    text-align: left;
+}
+
+.message-ai {
+    text-align: left;
+}
+
+.message-ai .message-content {
+    background: white;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 18px 18px 18px 4px;
+    display: inline-block;
+    max-width: 80%;
+    padding: 0.75rem 1.25rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.message-ai .message-content strong {
+    color: var(--primary-emerald);
+}
+
+.message-timestamp {
+    font-size: 0.7rem;
+    color: #999;
+    margin-top: 0.25rem;
+}
+
+.ai-avatar {
+    width: 35px;
+    height: 35px;
+    background: linear-gradient(135deg, var(--primary-gold) 0%, #c9a227 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+}
+
+.ai-avatar i {
+    color: white;
+    font-size: 1rem;
+}
+
+.user-avatar {
+    width: 35px;
+    height: 35px;
+    background: linear-gradient(135deg, var(--primary-emerald) 0%, var(--dark-emerald) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.5rem;
+    flex-shrink: 0;
+}
+
+.user-avatar i {
+    color: white;
+    font-size: 1rem;
+}
+
+.chat-input-container {
+    background: white;
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    border-radius: 30px;
+    padding: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.chat-input {
+    border: none;
+    flex: 1;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    outline: none;
+    background: transparent;
+}
+
+.chat-send-btn {
+    background: linear-gradient(135deg, var(--primary-emerald) 0%, var(--dark-emerald) 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.chat-send-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(13, 107, 79, 0.4);
+}
+
+.chat-send-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.suggestion-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.suggestion-chip {
+    background: linear-gradient(135deg, rgba(13, 107, 79, 0.1) 0%, rgba(6, 78, 54, 0.1) 100%);
+    border: 1px solid rgba(13, 107, 79, 0.2);
+    color: var(--primary-emerald);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.suggestion-chip:hover {
+    background: var(--primary-emerald);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.islamic-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.islamic-header .bismillah {
+    font-family: 'Amiri', serif;
+    font-size: 1.8rem;
+    color: var(--primary-emerald);
+    direction: rtl;
+}
+
+.typing-indicator {
+    display: none;
+    padding: 0.75rem 1.25rem;
+    background: white;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 18px;
+    margin-bottom: 1rem;
+}
+
+.typing-indicator.show {
+    display: inline-block;
+}
+
+.typing-indicator span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--primary-emerald);
+    border-radius: 50%;
+    margin: 0 2px;
+    animation: typing 1.4s infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-5px);
+    }
+}
+
+.welcome-message {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+.welcome-message i {
+    font-size: 3rem;
+    color: var(--primary-gold);
+    margin-bottom: 1rem;
+}
+
+.welcome-message h4 {
+    color: var(--primary-emerald);
+    margin-bottom: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 col-xl-8 mx-auto">
+        <div class="islamic-header">
+            <div class="bismillah mb-2">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
+            <h2 class="page-title text-center mb-1">
+                <i class="bi bi-robot me-2" style="color: var(--primary-gold);"></i>
+                Islamic AI Assistant
+            </h2>
+            <p class="text-muted">Ask questions about Islamic teachings, prayers, and more</p>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body p-0">
+                <div class="chat-container" id="chatContainer">
+                    {% if not chat_history %}
+                    <div class="welcome-message" id="welcomeMessage">
+                        <i class="bi bi-moon-stars-fill d-block"></i>
+                        <h4>Assalamu Alaikum!</h4>
+                        <p>Welcome to the Islamic AI Assistant. I'm here to help you learn about Islam, prayers, duas, and more.</p>
+                        <p class="mb-0 text-muted small">Try asking about prayer times, the pillars of Islam, or Islamic greetings!</p>
+                    </div>
+                    {% else %}
+                        {% for chat in chat_history %}
+                        <div class="message message-user">
+                            <div class="d-flex justify-content-end align-items-start">
+                                <div>
+                                    <div class="message-content">{{ chat.message }}</div>
+                                    <div class="message-timestamp">{{ chat.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                                </div>
+                                <div class="user-avatar">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="message message-ai">
+                            <div class="d-flex align-items-start">
+                                <div class="ai-avatar">
+                                    <i class="bi bi-moon-stars-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="message-content">{{ chat.response | safe | replace('\n', '<br>') }}</div>
+                                    <div class="message-timestamp">{{ chat.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <div class="typing-indicator" id="typingIndicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                
+                <div class="p-3 border-top">
+                    <div class="suggestion-chips" id="suggestions">
+                        <span class="suggestion-chip" onclick="sendSuggestion(this)">What are the five pillars of Islam?</span>
+                        <span class="suggestion-chip" onclick="sendSuggestion(this)">Tell me about prayer times</span>
+                        <span class="suggestion-chip" onclick="sendSuggestion(this)">What is Zakat?</span>
+                        <span class="suggestion-chip" onclick="sendSuggestion(this)">Islamic greetings</span>
+                        <span class="suggestion-chip" onclick="sendSuggestion(this)">Common duas</span>
+                    </div>
+                    
+                    <div class="chat-input-container mt-3">
+                        <input type="text" class="chat-input" id="messageInput" placeholder="Ask about Islamic teachings..." autocomplete="off">
+                        <button class="chat-send-btn" id="sendBtn" onclick="sendMessage()">
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <button class="btn btn-outline-danger btn-sm" onclick="clearHistory()">
+                <i class="bi bi-trash me-1"></i>Clear Chat History
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const chatContainer = document.getElementById('chatContainer');
+const messageInput = document.getElementById('messageInput');
+const sendBtn = document.getElementById('sendBtn');
+const typingIndicator = document.getElementById('typingIndicator');
+const welcomeMessage = document.getElementById('welcomeMessage');
+const suggestions = document.getElementById('suggestions');
+
+messageInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+});
+
+function scrollToBottom() {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+function sendSuggestion(element) {
+    messageInput.value = element.textContent;
+    sendMessage();
+}
+
+function sendMessage() {
+    const message = messageInput.value.trim();
+    if (!message) return;
+    
+    if (welcomeMessage) {
+        welcomeMessage.style.display = 'none';
+    }
+    
+    const userMessageHtml = `
+        <div class="message message-user">
+            <div class="d-flex justify-content-end align-items-start">
+                <div>
+                    <div class="message-content">${escapeHtml(message)}</div>
+                    <div class="message-timestamp">${getCurrentTime()}</div>
+                </div>
+                <div class="user-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    chatContainer.insertBefore(createElementFromHTML(userMessageHtml), typingIndicator);
+    messageInput.value = '';
+    sendBtn.disabled = true;
+    
+    typingIndicator.classList.add('show');
+    scrollToBottom();
+    
+    fetch('/ai/chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        typingIndicator.classList.remove('show');
+        
+        if (data.error) {
+            showError(data.error);
+            return;
+        }
+        
+        const formattedResponse = data.response
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+        
+        const aiMessageHtml = `
+            <div class="message message-ai">
+                <div class="d-flex align-items-start">
+                    <div class="ai-avatar">
+                        <i class="bi bi-moon-stars-fill"></i>
+                    </div>
+                    <div>
+                        <div class="message-content">${formattedResponse}</div>
+                        <div class="message-timestamp">${data.timestamp}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        chatContainer.insertBefore(createElementFromHTML(aiMessageHtml), typingIndicator);
+        scrollToBottom();
+    })
+    .catch(error => {
+        typingIndicator.classList.remove('show');
+        showError('Failed to get response. Please try again.');
+    })
+    .finally(() => {
+        sendBtn.disabled = false;
+        messageInput.focus();
+    });
+}
+
+function clearHistory() {
+    if (!confirm('Are you sure you want to clear your chat history?')) return;
+    
+    fetch('/ai/clear', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function getCurrentTime() {
+    return new Date().toLocaleString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function createElementFromHTML(htmlString) {
+    const div = document.createElement('div');
+    div.innerHTML = htmlString.trim();
+    return div.firstChild;
+}
+
+function showError(message) {
+    const errorHtml = `
+        <div class="message message-ai">
+            <div class="d-flex align-items-start">
+                <div class="ai-avatar" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <div>
+                    <div class="message-content" style="border-color: #dc3545;">${message}</div>
+                </div>
+            </div>
+        </div>
+    `;
+    chatContainer.insertBefore(createElementFromHTML(errorHtml), typingIndicator);
+    scrollToBottom();
+}
+
+scrollToBottom();
+</script>
+{% endblock %}

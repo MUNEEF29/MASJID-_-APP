@@ -1,14 +1,20 @@
-# Masjid e Ameer e Muaviyyah - Accounting System
+# MSJID E AMEER E MUAVIYYAH - Islamic Accounting System
 
 ## Overview
-A production-ready, audit-grade web-based accounting application designed for **Masjid e Ameer e Muaviyyah (مسجد امیر معاویہ)**. Built with Flask and PostgreSQL, featuring double-entry bookkeeping, role-based access control, and Islamic compliance features. The system uses **Indian Rupee (₹)** as the default currency.
+A production-ready, audit-grade web-based accounting application designed for **MSJID E AMEER E MUAVIYYAH (مسجد امیر معاویہ)**. Built with Flask and PostgreSQL, featuring double-entry bookkeeping, role-based access control, and Islamic compliance features. The system uses **Indian Rupee (₹)** as the default currency.
+
+**Key Highlights:**
+- Configurable app name through Admin Settings
+- Beautiful Islamic-themed UI with Bismillah and Arabic calligraphy
+- AI Islamic Assistant for learning about Islamic teachings
 
 ## Tech Stack
 - **Backend**: Python 3.11 + Flask
 - **Database**: PostgreSQL (via SQLAlchemy ORM)
-- **Authentication**: Flask-Login with role-based access control
+- **Authentication**: Flask-Login with role-based access control + Google OAuth
 - **Frontend**: HTML5, CSS3, JavaScript with Bootstrap 5
 - **PDF Generation**: ReportLab
+- **AI Assistant**: Built-in Islamic knowledge base
 - **Fonts**: Amiri (Arabic/Islamic calligraphy), Poppins (modern UI)
 
 ## Design Theme
@@ -51,6 +57,22 @@ A production-ready, audit-grade web-based accounting application designed for **
 - Transparent labeling
 - Bismillah greeting on login
 
+### AI Islamic Assistant
+- Built-in knowledge base for Islamic teachings
+- Information about Five Pillars of Islam
+- Prayer times guidance
+- Zakat and Sadaqah explanations
+- Common Islamic greetings and phrases
+- Duas for various occasions
+- Quran and Hajj information
+- Chat history saved per user
+
+### Dynamic App Settings
+- Change app name (English and Arabic)
+- Customize tagline
+- Configure currency symbol and code
+- All settings logged in audit trail
+
 ### Reports
 - Daily, Monthly, Yearly reports
 - Donor-wise contribution reports
@@ -59,20 +81,23 @@ A production-ready, audit-grade web-based accounting application designed for **
 
 ## Configuration (config.py)
 ```python
-MOSQUE_NAME = "Masjid e Ameer e Muaviyyah"
-MOSQUE_NAME_ARABIC = "مسجد امیر معاویہ"
+APP_NAME = "MSJID E AMEER E MUAVIYYAH"
+APP_NAME_ARABIC = "مسجد امیر معاویہ"
+APP_TAGLINE = "Islamic Accounting & Financial Management System"
 CURRENCY_SYMBOL = "₹"
 CURRENCY_CODE = "INR"
 CURRENCY_NAME = "Indian Rupee"
 ```
+
+Note: These settings can be overridden via Admin > App Settings in the UI.
 
 ## Project Structure
 ```
 /
 ├── app.py              # Main Flask application
 ├── main.py             # Entry point (runs on port 5000)
-├── config.py           # Configuration settings (mosque name, currency)
-├── models.py           # SQLAlchemy database models
+├── config.py           # Configuration settings (app name, currency)
+├── models.py           # SQLAlchemy database models (including AppSettings, AIChatHistory)
 ├── routes/             # Blueprint routes
 │   ├── auth.py         # Authentication
 │   ├── dashboard.py    # Dashboard
@@ -80,16 +105,18 @@ CURRENCY_NAME = "Indian Rupee"
 │   ├── expenses.py     # Expense management
 │   ├── accounts.py     # Chart of accounts & financial reports
 │   ├── reports.py      # Report generation
-│   └── admin.py        # User & system administration
+│   ├── admin.py        # User & system administration + App Settings
+│   └── ai_assistant.py # Islamic AI Assistant
 ├── templates/          # Jinja2 HTML templates
 │   ├── base.html       # Base template with Islamic theme
 │   ├── auth/           # Login, profile pages
-│   ├── dashboard/      # Dashboard with greeting
+│   ├── dashboard/      # Dashboard with Bismillah greeting
 │   ├── income/         # Income entry pages
 │   ├── expenses/       # Expense entry pages
 │   ├── accounts/       # Chart of accounts, ledger, statements
 │   ├── reports/        # Report pages
-│   └── admin/          # Admin pages
+│   ├── admin/          # Admin pages + Settings
+│   └── ai/             # AI Islamic Assistant
 ├── static/
 │   ├── css/style.css   # Islamic-themed styling
 │   └── js/main.js      # JavaScript utilities
@@ -112,9 +139,13 @@ The application runs on port 5000 and is configured to work with the PostgreSQL 
 - Audit-grade data integrity
 
 ## Recent Changes
+- **December 2025**: Added AI Islamic Assistant with knowledge base for Islamic teachings
+- **December 2025**: Added dynamic App Settings to change app name, tagline, and currency
+- **December 2025**: Created beautiful Islamic login page with mosque icon and Bismillah
+- **December 2025**: Updated app name to "MSJID E AMEER E MUAVIYYAH"
+- **December 2025**: Added Arabic name display throughout the app
 - **December 2024**: Changed currency to Indian Rupee (₹)
 - **December 2024**: Removed verification process - income and expenses now auto-post to accounts on creation
-- **December 2024**: Updated mosque name to "Masjid e Ameer e Muaviyyah"
 - **December 2024**: Implemented stunning Islamic-themed UI with geometric patterns
 - **December 2024**: Added Bismillah greeting on login page
 - **December 2024**: Enhanced dashboard with Islamic greeting (Assalamu Alaikum)
