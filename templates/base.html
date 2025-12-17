@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{{ config.MOSQUE_NAME }}{% endblock %}</title>
+    <title>{% block title %}{{ config.APP_NAME }}{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
@@ -15,11 +15,10 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ url_for('dashboard.index') }}">
                 <div class="mosque-logo">
-                    <i class="bi bi-moon-stars-fill"></i>
+                    <i class="bi bi-wallet2"></i>
                 </div>
                 <div>
-                    <span>{{ config.MOSQUE_NAME }}</span>
-                    <span class="arabic-text">{{ config.MOSQUE_NAME_ARABIC }}</span>
+                    <span>{{ config.APP_NAME }}</span>
                 </div>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -38,9 +37,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ url_for('income.index') }}"><i class="bi bi-list-ul me-2"></i>View All</a></li>
-                            {% if not current_user.is_read_only() %}
                             <li><a class="dropdown-item" href="{{ url_for('income.create') }}"><i class="bi bi-plus-circle me-2"></i>New Entry</a></li>
-                            {% endif %}
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
@@ -49,9 +46,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ url_for('expenses.index') }}"><i class="bi bi-list-ul me-2"></i>View All</a></li>
-                            {% if not current_user.is_read_only() %}
                             <li><a class="dropdown-item" href="{{ url_for('expenses.create') }}"><i class="bi bi-plus-circle me-2"></i>New Entry</a></li>
-                            {% endif %}
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
@@ -73,24 +68,18 @@
                             <li><a class="dropdown-item" href="{{ url_for('reports.index') }}"><i class="bi bi-grid me-2"></i>Report Center</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('reports.daily') }}"><i class="bi bi-calendar-day me-2"></i>Daily Report</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('reports.monthly') }}"><i class="bi bi-calendar-month me-2"></i>Monthly Report</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('reports.donor') }}"><i class="bi bi-people me-2"></i>Donor Report</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('reports.fund_summary') }}"><i class="bi bi-pie-chart me-2"></i>Fund Summary</a></li>
                         </ul>
                     </li>
-                    {% if current_user.role == 'admin' or current_user.role == 'auditor' %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            <i class="bi bi-gear"></i> Admin
+                            <i class="bi bi-gear"></i> Settings
                         </a>
                         <ul class="dropdown-menu">
-                            {% if current_user.role == 'admin' %}
-                            <li><a class="dropdown-item" href="{{ url_for('admin.index') }}"><i class="bi bi-people-fill me-2"></i>User Management</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.period_locks') }}"><i class="bi bi-lock me-2"></i>Period Locks</a></li>
-                            {% endif %}
-                            <li><a class="dropdown-item" href="{{ url_for('admin.audit_log') }}"><i class="bi bi-clock-history me-2"></i>Audit Log</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.audit_log') }}"><i class="bi bi-clock-history me-2"></i>Activity Log</a></li>
                         </ul>
                     </li>
-                    {% endif %}
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item d-none d-lg-flex align-items-center me-3">
@@ -102,7 +91,6 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle"></i> {{ current_user.full_name }}
-                            <span class="badge bg-light text-dark ms-1">{{ current_user.role }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}"><i class="bi bi-person me-2"></i>Profile</a></li>
@@ -134,8 +122,8 @@
 
     <footer class="footer">
         <div class="container">
-            <span class="footer-brand">{{ config.MOSQUE_NAME }}</span>
-            <span>Accounting Management System {{ now().year if now is defined else '2024' }}</span>
+            <span class="footer-brand">{{ config.APP_NAME }}</span>
+            <span>Personal Finance Manager {{ now().year if now is defined else '2024' }}</span>
         </div>
     </footer>
 
@@ -155,7 +143,7 @@
             second: '2-digit',
             hour12: true
         };
-        const formatted = now.toLocaleDateString('en-IN', options);
+        const formatted = now.toLocaleDateString('en-US', options);
         const el = document.getElementById('live-datetime');
         if (el) el.textContent = formatted;
     }
