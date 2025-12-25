@@ -10,6 +10,7 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 def log_action(action, entity_type, entity_id=None, old_values=None, new_values=None, remarks=None):
     if current_user.is_authenticated:
+        from models import AuditLog
         log = AuditLog(
             user_id=current_user.id,
             action=action,
@@ -56,13 +57,14 @@ def login():
         remember = request.form.get('remember', False)
         
         if email == admin_email and password == admin_password:
+            from models import User, create_default_accounts_for_user
             user = User.query.filter_by(email=email).first()
             if not user:
                 # Create the one user if they don't exist
                 user = User(
                     username='admin',
                     email=email,
-                    full_name='Personal Administrator',
+                    full_name='Mr. Shakir',
                     is_active=True
                 )
                 user.set_password(password)

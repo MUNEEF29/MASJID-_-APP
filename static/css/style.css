@@ -801,3 +801,51 @@ a:hover {
     justify-content: center;
     font-weight: 600;
 }
+
+/* Mobile Optimization for Personal App */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+    .card-body {
+        padding: 0.75rem !important;
+    }
+    .stat-card h3 {
+        font-size: 1.1rem !important;
+    }
+    .page-title {
+        font-size: 1rem !important;
+    }
+    .navbar-brand span {
+        font-size: 0.85rem !important;
+    }
+    .navbar-brand .mosque-logo {
+        width: 30px !important;
+        height: 30px !important;
+    }
+    .btn-lg {
+        padding: 0.4rem 0.8rem !important;
+        font-size: 0.9rem !important;
+    }
+    .table td, .table th {
+        padding: 0.4rem 0.5rem !important;
+        font-size: 0.75rem !important;
+    }
+    .quick-action-btn {
+        padding: 0.4rem !important;
+    }
+    .quick-action-btn i {
+        font-size: 1.2rem !important;
+    }
+    .quick-action-btn span {
+        font-size: 0.65rem !important;
+    }
+    .stat-card .icon-bg {
+        font-size: 1.8rem !important;
+    }
+}
+
+.compact-stat {
+    padding: 0.6rem !important;
+}

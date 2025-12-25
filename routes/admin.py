@@ -88,6 +88,7 @@ def period_locks():
 @admin_bp.route('/period-locks/create', methods=['POST'])
 @login_required
 def create_period_lock():
+    from models import PeriodLock
     year = request.form.get('year', type=int)
     month = request.form.get('month', type=int)
     remarks = request.form.get('remarks', '').strip()
