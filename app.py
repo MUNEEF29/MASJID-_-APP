@@ -46,7 +46,6 @@ def create_app():
     from routes.reports import reports_bp
     from routes.admin import admin_bp
     from routes.ai_assistant import ai_assistant_bp
-    from google_auth import google_auth
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -56,7 +55,6 @@ def create_app():
     app.register_blueprint(reports_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(ai_assistant_bp)
-    app.register_blueprint(google_auth)
     
     @app.context_processor
     def inject_now():

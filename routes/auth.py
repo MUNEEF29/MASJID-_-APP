@@ -1,6 +1,7 @@
 from datetime import datetime
 from functools import wraps
 import json
+import os
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from models import db, User, AuditLog, create_default_accounts_for_user
@@ -45,91 +46,46 @@ def login():
         return redirect(url_for('dashboard.index'))
     
     if request.method == 'POST':
+        # Hardcoded for personal use as requested
+        # For security, the user should change this in the source or via secrets
+        admin_email = os.environ.get('ADMIN_EMAIL', 'admin@admin.com')
+        admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
+        
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
         remember = request.form.get('remember', False)
         
-        if not email or not password:
-            flash('Please enter both email and password.', 'danger')
-            return render_template('auth/login.html')
-        
-        user = User.query.filter_by(email=email).first()
-        
-        if user and user.check_password(password):
-            if not user.is_active:
-                flash('Your account has been deactivated.', 'danger')
-                return render_template('auth/login.html')
+        if email == admin_email and password == admin_password:
+            user = User.query.filter_by(email=email).first()
+            if not user:
+                # Create the one user if they don't exist
+                user = User(
+                    username='admin',
+                    email=email,
+                    full_name='Personal Administrator',
+                    is_active=True
+                )
+                user.set_password(password)
+                db.session.add(user)
+                db.session.commit()
+                create_default_accounts_for_user(user.id)
             
-            login_user(user, remember=remember)
+            login_user(user, remember=remember == 'true' or remember is True)
             user.last_login = datetime.utcnow()
             db.session.commit()
             
             log_action('login', 'user', user.id)
             
-            next_page = request.args.get('next')
-            if next_page:
-                return redirect(next_page)
             return redirect(url_for('dashboard.index'))
         else:
-            flash('Invalid email or password.', 'danger')
+            flash('Invalid access credentials.', 'danger')
     
     return render_template('auth/login.html')
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('dashboard.index'))
-    
-    if request.method == 'POST':
-        full_name = request.form.get('full_name', '').strip()
-        email = request.form.get('email', '').strip().lower()
-        password = request.form.get('password', '')
-        confirm_password = request.form.get('confirm_password', '')
-        
-        if not all([full_name, email, password, confirm_password]):
-            flash('Please fill in all required fields.', 'danger')
-            return render_template('auth/register.html')
-        
-        if password != confirm_password:
-            flash('Passwords do not match.', 'danger')
-            return render_template('auth/register.html')
-        
-        if len(password) < 8:
-            flash('Password must be at least 8 characters long.', 'danger')
-            return render_template('auth/register.html')
-        
-        if User.query.filter_by(email=email).first():
-            flash('An account with this email already exists.', 'danger')
-            return render_template('auth/register.html')
-        
-        username = email.split('@')[0]
-        base_username = username
-        counter = 1
-        while User.query.filter_by(username=username).first():
-            username = f"{base_username}{counter}"
-            counter += 1
-        
-        user = User(
-            username=username,
-            email=email,
-            full_name=full_name,
-            is_active=True
-        )
-        user.set_password(password)
-        
-        db.session.add(user)
-        db.session.commit()
-        
-        create_default_accounts_for_user(user.id)
-        
-        login_user(user, remember=True)
-        user.last_login = datetime.utcnow()
-        db.session.commit()
-        
-        flash(f'Welcome {full_name}! Your account has been created successfully.', 'success')
-        return redirect(url_for('dashboard.index'))
-    
-    return render_template('auth/register.html')
+    flash('Registration is disabled for this personal application.', 'warning')
+    return redirect(url_for('auth.login'))
 
 @auth_bp.route('/logout')
 @login_required
