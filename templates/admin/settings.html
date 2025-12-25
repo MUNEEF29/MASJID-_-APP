@@ -84,6 +84,25 @@
     </div>
     
     <div class="col-lg-4">
+        <div class="card border-danger mb-4">
+            <div class="card-header bg-danger text-white">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>Danger Zone
+            </div>
+            <div class="card-body">
+                <p class="text-danger small fw-bold">Warning: This action cannot be undone.</p>
+                <p class="small text-muted">Clearing data will delete all incomes, expenses, transactions, and reset your accounts to default.</p>
+                <form method="POST" action="{{ url_for('admin.clear_data') }}" onsubmit="return confirm('Are you absolutely sure you want to clear all data?');">
+                    <div class="mb-3">
+                        <label class="form-label small">Type <strong>DELETE ALL</strong> to confirm</label>
+                        <input type="text" name="confirmation" class="form-control form-control-sm" required placeholder="DELETE ALL">
+                    </div>
+                    <button type="submit" class="btn btn-danger btn-sm w-100">
+                        <i class="bi bi-trash-fill me-2"></i>Clear All Data
+                    </button>
+                </form>
+            </div>
+        </div>
+
         <div class="card mb-4">
             <div class="card-header">
                 <i class="bi bi-eye me-2"></i>Preview

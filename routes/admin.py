@@ -1,10 +1,45 @@
 from datetime import datetime
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
-from models import db, User, AuditLog, PeriodLock, AppSettings
+from models import db, User, AuditLog, PeriodLock, AppSettings, Income, Expense, Account, Transaction, JournalEntry, AIChatHistory, create_default_accounts_for_user
 from routes.auth import log_action
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
+@admin_bp.route('/clear-data', methods=['POST'])
+@login_required
+def clear_data():
+    confirmation = request.form.get('confirmation')
+    if confirmation != 'DELETE ALL':
+        flash('Data clearing cancelled. Please type the exact confirmation phrase.', 'warning')
+        return redirect(url_for('admin.settings'))
+    
+    try:
+        # We preserve the User and AppSettings
+        # Delete related data for the current user
+        Income.query.filter_by(user_id=current_user.id).delete()
+        Expense.query.filter_by(user_id=current_user.id).delete()
+        JournalEntry.query.join(Account).filter(Account.user_id == current_user.id).delete()
+        Transaction.query.filter_by(user_id=current_user.id).delete()
+        PeriodLock.query.filter_by(user_id=current_user.id).delete()
+        AIChatHistory.query.filter_by(user_id=current_user.id).delete()
+        AuditLog.query.filter_by(user_id=current_user.id).delete()
+        
+        # Delete accounts but recreate defaults
+        Account.query.filter_by(user_id=current_user.id).delete()
+        
+        db.session.commit()
+        
+        # Recreate defaults
+        create_default_accounts_for_user(current_user.id)
+        
+        log_action('clear_data', 'system', None, None, None, 'Cleared all transactional data')
+        flash('All transaction data has been cleared. Accounts have been reset to default.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'An error occurred while clearing data: {str(e)}', 'danger')
+        
+    return redirect(url_for('admin.settings'))
 
 @admin_bp.route('/audit-log')
 @login_required
