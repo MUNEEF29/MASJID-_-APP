@@ -23,13 +23,24 @@ def index():
     ).all()
     bank_balance = sum(acc.get_balance() for acc in bank_accounts)
     
+    # Personal/General Income (Excluding Zakat, Sadaqah, Fitrah, Fidyah, Kaffarah, Aqeeqah, Qurbani)
+    # These represent Rent, Collections, and general donations
     monthly_income = db.session.query(
         func.coalesce(func.sum(Income.amount), 0)
     ).filter(
         Income.user_id == current_user.id,
         Income.date >= first_of_month,
         Income.is_reversed == False,
-        Income.verification_status == VerificationStatus.VERIFIED
+        Income.verification_status == VerificationStatus.VERIFIED,
+        Income.category.notin_([
+            IncomeCategory.ZAKAT, 
+            IncomeCategory.SADAQAH, 
+            IncomeCategory.FITRAH, 
+            IncomeCategory.FIDYAH, 
+            IncomeCategory.KAFFARAH, 
+            IncomeCategory.AQEEQAH, 
+            IncomeCategory.QURBANI
+        ])
     ).scalar() or Decimal('0')
     
     monthly_expense = db.session.query(

@@ -46,6 +46,7 @@ def clear_data():
         
     return redirect(url_for('admin.settings'))
 
+
 @admin_bp.route('/audit-log')
 @login_required
 def audit_log():
