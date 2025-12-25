@@ -15,18 +15,22 @@ def clear_data():
         return redirect(url_for('admin.settings'))
     
     try:
-        # We preserve the User and AppSettings
-        # Delete related data for the current user
-        Income.query.filter_by(user_id=current_user.id).delete()
-        Expense.query.filter_by(user_id=current_user.id).delete()
-        JournalEntry.query.join(Account).filter(Account.user_id == current_user.id).delete()
-        Transaction.query.filter_by(user_id=current_user.id).delete()
-        PeriodLock.query.filter_by(user_id=current_user.id).delete()
-        AIChatHistory.query.filter_by(user_id=current_user.id).delete()
-        AuditLog.query.filter_by(user_id=current_user.id).delete()
+        # Delete related data for the current user using direct queries to avoid ORM issues
+        # Explicitly delete in order of dependencies if necessary
+        db.session.query(Income).filter_by(user_id=current_user.id).delete()
+        db.session.query(Expense).filter_by(user_id=current_user.id).delete()
         
-        # Delete accounts but recreate defaults
-        Account.query.filter_by(user_id=current_user.id).delete()
+        # Journal entries belong to accounts which belong to users
+        # Direct SQL delete is safer here
+        db.session.execute(db.text("DELETE FROM journal_entries WHERE account_id IN (SELECT id FROM accounts WHERE user_id = :uid)"), {"uid": current_user.id})
+        
+        db.session.query(Transaction).filter_by(user_id=current_user.id).delete()
+        db.session.query(PeriodLock).filter_by(user_id=current_user.id).delete()
+        db.session.query(AIChatHistory).filter_by(user_id=current_user.id).delete()
+        db.session.query(AuditLog).filter_by(user_id=current_user.id).delete()
+        
+        # Delete accounts
+        db.session.query(Account).filter_by(user_id=current_user.id).delete()
         
         db.session.commit()
         
@@ -37,6 +41,7 @@ def clear_data():
         flash('All transaction data has been cleared. Accounts have been reset to default.', 'success')
     except Exception as e:
         db.session.rollback()
+        current_app.logger.error(f"Error clearing data: {str(e)}")
         flash(f'An error occurred while clearing data: {str(e)}', 'danger')
         
     return redirect(url_for('admin.settings'))
